@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { motion, useScroll, useTransform, AnimatePresence, useSpring, useMotionValue, useMotionTemplate } from 'framer-motion';
+import { motion, useScroll, useTransform, AnimatePresence, useSpring, useMotionValue, useMotionTemplate, useInView } from 'framer-motion';
 import { ArrowUpRight, Menu, X, ArrowRight, ShieldCheck, Cpu, Database, Activity, ArrowUp, Terminal, Sliders, Layers, Server, ShieldAlert, CheckCircle2 } from 'lucide-react';
 
 const GlobalStyles = () => (
@@ -89,6 +89,7 @@ const GlobalStyles = () => (
         border-bottom: 1px solid rgba(255, 255, 255, 0.2);
         color: white;
         transition: border-color 0.4s ease;
+        border-radius: 0;
       }
       .footer-input:focus {
         outline: none;
@@ -98,8 +99,8 @@ const GlobalStyles = () => (
       input[type="range"]::-webkit-slider-thumb {
         -webkit-appearance: none;
         appearance: none;
-        width: 12px;
-        height: 12px;
+        width: 16px;
+        height: 16px;
         background: #ffffff;
         border-radius: 50%;
         cursor: pointer;
@@ -209,7 +210,7 @@ const EliteButton = ({ children, onClick, variant = "primary", disabled = false 
 
   const baseStyle = variant === "primary" 
     ? "bg-white text-black border border-white" 
-    : "bg-transparent text-white border border-white/20 hover:border-white";
+    : "bg-transparent text-white border border-white/20 hover:border-white active:border-white";
 
   return (
     <motion.button
@@ -220,20 +221,21 @@ const EliteButton = ({ children, onClick, variant = "primary", disabled = false 
       disabled={disabled}
       animate={{ x: position.x, y: position.y }}
       transition={{ type: "spring", stiffness: 150, damping: 15, mass: 0.1 }}
-      className={`group relative overflow-hidden px-8 py-3.5 font-montserrat font-bold uppercase tracking-widest text-xs transition-all duration-500 ${baseStyle} ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
+      className={`group relative overflow-hidden px-6 sm:px-8 py-3.5 font-montserrat font-bold uppercase tracking-widest text-[10px] sm:text-xs transition-all duration-500 w-full sm:w-auto text-center justify-center flex ${baseStyle} ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
     >
-      {!disabled && <div className={`absolute inset-0 ${variant === 'primary' ? 'bg-neutral-900' : 'bg-white'} translate-y-[100%] group-hover:translate-y-0 transition-transform duration-500 ease-[cubic-bezier(0.76,0,0.24,1)] z-0`} />}
-      <span className={`relative z-10 flex items-center gap-4 transition-colors duration-500 ${variant === 'primary' && !disabled ? 'group-hover:text-white' : !disabled ? 'group-hover:text-black' : ''}`}>
-        <ScrambleText text={children} />
-        {!disabled && <ArrowUpRight className="group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform duration-500 w-4 h-4" />}
+      {!disabled && <div className={`absolute inset-0 ${variant === 'primary' ? 'bg-neutral-900' : 'bg-white'} translate-y-[100%] group-hover:translate-y-0 transition-transform duration-500 ease-[cubic-bezier(0.76,0,0.24,1)] z-0 hidden md:block`} />}
+      <span className={`relative z-10 flex items-center gap-3 transition-colors duration-500 ${variant === 'primary' && !disabled ? 'md:group-hover:text-white' : !disabled ? 'md:group-hover:text-black' : ''}`}>
+        <ScrambleText text={children} runOnMount={true} />
+        {!disabled && <ArrowUpRight className="md:group-hover:translate-x-1 md:group-hover:-translate-y-1 transition-transform duration-500 w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />}
       </span>
     </motion.button>
   );
 };
 
-const ScrambleText = ({ text, className, trigger = null }) => {
+const ScrambleText = ({ text, className, trigger = null, runOnMount = false }) => {
   const [displayText, setDisplayText] = useState(text);
   const chars = '!<>-_\\/[]{}—=+*^?#________';
+  const hasRun = useRef(false);
   
   const scramble = () => {
     let iteration = 0;
@@ -253,6 +255,13 @@ const ScrambleText = ({ text, className, trigger = null }) => {
     }
   }, [trigger]);
 
+  useEffect(() => {
+    if (runOnMount && !hasRun.current) {
+      scramble();
+      hasRun.current = true;
+    }
+  }, [runOnMount]);
+
   return (
     <span onMouseEnter={scramble} className={className}>
       {displayText}
@@ -269,7 +278,7 @@ const LiveTelemetry = () => {
   }, []);
 
   return (
-    <div className="absolute bottom-10 flex flex-col items-end gap-1 font-montserrat text-[9px] text-neutral-500 tracking-[0.2em] uppercase z-20" style={{ right: '3%' }}>
+    <div className="absolute bottom-10 hidden md:flex flex-col items-end gap-1 font-montserrat text-[9px] text-neutral-500 tracking-[0.2em] uppercase z-20" style={{ right: 'max(1.5rem, 3%)' }}>
       <div className="flex items-center gap-2">
         <div className="w-1 h-1 rounded-full bg-green-500 animate-pulse" />
         <span>SYS.ONLINE</span>
@@ -286,7 +295,7 @@ const ScrollIndicator = () => (
     initial={{ opacity: 0 }}
     animate={{ opacity: 1 }}
     transition={{ delay: 1.5, duration: 1 }}
-    className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-4 z-20"
+    className="absolute bottom-6 sm:bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-4 z-20"
   >
     <span 
       className="font-montserrat text-[8px] tracking-[0.4em] uppercase text-neutral-500"
@@ -294,7 +303,7 @@ const ScrollIndicator = () => (
     >
       Scroll
     </span>
-    <div className="w-[1px] h-16 bg-white/10 relative overflow-hidden">
+    <div className="w-[1px] h-12 sm:h-16 bg-white/10 relative overflow-hidden">
       <motion.div
         className="absolute top-0 left-0 w-full h-[20%] bg-white"
         animate={{ top: ["-20%", "120%"] }}
@@ -350,17 +359,25 @@ const Navigation = ({ onNavigate, currentPage }) => {
     onNavigate(target);
   };
 
+  const navLinks = [
+    { id: 'home', label: 'Home' },
+    { id: 'solutions', label: 'Solutions' },
+    { id: 'about', label: 'About Us' },
+    { id: 'tech', label: 'Why We Rock' },
+    { id: 'blogs', label: 'Insights' },
+    { id: 'contact', label: 'Contact' }
+  ];
+
   return (
     <>
       <motion.nav
-        className="fixed top-0 w-full z-50 mix-blend-difference text-white py-8 md:py-10"
+        className="fixed top-0 w-full z-50 mix-blend-difference text-white py-6 md:py-8"
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 1, delay: 0.5 }}
       >
-        <div className="w-full flex items-center justify-between" style={{ paddingLeft: '1.5%', paddingRight: '1.5%' }}>
-          {/* Logo reduced by ~35% -> h-[26px] md:h-[36px] */}
-          <div className="h-[26px] md:h-[36px] cursor-pointer flex items-center shrink-0" onClick={() => handleNav('home')}>
+        <div className="w-full flex items-center justify-between" style={{ paddingLeft: 'max(1.25rem, 1.5%)', paddingRight: 'max(1.25rem, 1.5%)' }}>
+          <div className="h-[22px] sm:h-[26px] md:h-[36px] cursor-pointer flex items-center shrink-0" onClick={() => handleNav('home')}>
             <img 
               src={logoUrl} 
               alt="BAKR.JS Logo" 
@@ -369,34 +386,19 @@ const Navigation = ({ onNavigate, currentPage }) => {
           </div>
 
           <div className="hidden lg:flex items-center gap-10 font-montserrat text-[10px] font-bold tracking-widest uppercase text-white">
-            <MagneticElement>
-              <button onClick={() => handleNav('solutions')} className={`hover:opacity-50 transition-opacity p-2 block ${currentPage === 'solutions' ? 'underline decoration-2 underline-offset-4' : ''}`}>
-                Solutions
-              </button>
-            </MagneticElement>
-            <MagneticElement>
-              <button onClick={() => handleNav('about')} className={`hover:opacity-50 transition-opacity p-2 block ${currentPage === 'about' ? 'underline decoration-2 underline-offset-4' : ''}`}>
-                About Us
-              </button>
-            </MagneticElement>
-            <MagneticElement>
-              <button onClick={() => handleNav('tech')} className={`hover:opacity-50 transition-opacity p-2 block ${currentPage === 'tech' ? 'underline decoration-2 underline-offset-4' : ''}`}>
-                Why We Rock
-              </button>
-            </MagneticElement>
-            <MagneticElement>
-              <button onClick={() => handleNav('blogs')} className={`hover:opacity-50 transition-opacity p-2 block ${currentPage === 'blogs' ? 'underline decoration-2 underline-offset-4' : ''}`}>
-                Insights
-              </button>
-            </MagneticElement>
-            <MagneticElement>
-              <button onClick={() => handleNav('contact')} className={`hover:opacity-50 transition-opacity p-2 block ${currentPage === 'contact' ? 'underline decoration-2 underline-offset-4' : ''}`}>
-                Contact
-              </button>
-            </MagneticElement>
+            {navLinks.filter(l => l.id !== 'home').map((link) => (
+              <MagneticElement key={link.id}>
+                <button 
+                  onClick={() => handleNav(link.id)} 
+                  className={`hover:opacity-50 transition-opacity p-2 block ${currentPage === link.id ? 'underline decoration-2 underline-offset-4' : ''}`}
+                >
+                  {link.label}
+                </button>
+              </MagneticElement>
+            ))}
           </div>
 
-          <button className="lg:hidden p-2 text-white" onClick={() => setMobileMenuOpen(true)}>
+          <button className="lg:hidden p-2 text-white active:scale-95 transition-transform" onClick={() => setMobileMenuOpen(true)}>
             <Menu size={24} />
           </button>
         </div>
@@ -408,19 +410,27 @@ const Navigation = ({ onNavigate, currentPage }) => {
             initial={{ opacity: 0, y: "-100%" }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: "-100%" }}
-            transition={{ duration: 0.6, ease: [0.76, 0, 0.24, 1] }}
+            transition={{ duration: 0.5, ease: [0.76, 0, 0.24, 1] }}
             className="fixed inset-0 z-[100] bg-white text-black flex flex-col justify-center px-8"
           >
-            <button className="absolute top-6 right-6 p-2 text-black" onClick={() => setMobileMenuOpen(false)}>
+            <button className="absolute top-6 right-6 p-4 text-black active:scale-90 transition-transform" onClick={() => setMobileMenuOpen(false)}>
               <X size={32} />
             </button>
-            <div className="flex flex-col gap-6 font-bebas text-5xl md:text-7xl tracking-normal uppercase">
-              <button onClick={() => handleNav('home')} className="text-left hover:text-neutral-500 transition-colors">Home</button>
-              <button onClick={() => handleNav('solutions')} className="text-left hover:text-neutral-500 transition-colors">Solutions</button>
-              <button onClick={() => handleNav('about')} className="text-left hover:text-neutral-500 transition-colors">About Us</button>
-              <button onClick={() => handleNav('tech')} className="text-left hover:text-neutral-500 transition-colors">Why We Rock</button>
-              <button onClick={() => handleNav('blogs')} className="text-left hover:text-neutral-500 transition-colors">Insights</button>
-              <button onClick={() => handleNav('contact')} className="text-left hover:text-neutral-500 transition-colors">Contact</button>
+            <div className="flex flex-col gap-6 sm:gap-8 font-bebas text-5xl sm:text-6xl md:text-7xl tracking-normal uppercase">
+              {navLinks.map((link, i) => (
+                <div key={link.id} className="overflow-hidden">
+                  <motion.button 
+                    initial={{ y: "100%" }}
+                    animate={{ y: 0 }}
+                    exit={{ y: "100%" }}
+                    transition={{ delay: 0.1 + (i * 0.05), duration: 0.5, ease: [0.76, 0, 0.24, 1] }}
+                    onClick={() => handleNav(link.id)} 
+                    className="text-left hover:text-neutral-500 transition-colors block w-full"
+                  >
+                    {link.label}
+                  </motion.button>
+                </div>
+              ))}
             </div>
           </motion.div>
         )}
@@ -437,25 +447,25 @@ const GridElements = ({ color = "white" }) => {
 
   return (
     <>
-      <div className={`absolute left-[3%] top-0 bottom-0 w-[1px] ${opacityClass}/10`} />
-      <div className={`absolute left-[40%] top-0 bottom-0 w-[1px] ${opacityClass}/5`} />
-      <div className={`absolute left-[75%] top-0 bottom-0 w-[1px] ${opacityClass}/10`} />
-      <div className={`absolute left-[97%] top-0 bottom-0 w-[1px] ${opacityClass}/10`} />
+      <div className={`absolute left-[3%] sm:left-[max(1.5rem,3%)] top-0 bottom-0 w-[1px] ${opacityClass}/10`} />
+      <div className={`absolute left-[40%] top-0 bottom-0 w-[1px] ${opacityClass}/5 hidden sm:block`} />
+      <div className={`absolute left-[75%] top-0 bottom-0 w-[1px] ${opacityClass}/10 hidden sm:block`} />
+      <div className={`absolute right-[3%] sm:right-[max(1.5rem,3%)] top-0 bottom-0 w-[1px] ${opacityClass}/10`} />
       
       <div className={`absolute top-[25%] left-0 right-0 h-[1px] ${opacityClass}/10`} />
       <div className={`absolute top-[60%] left-0 right-0 h-[1px] ${opacityClass}/5`} />
       <div className={`absolute top-[92%] left-0 right-0 h-[1px] ${opacityClass}/10`} />
       
-      <div className={`absolute top-[25%] left-[40%] w-2 h-2 ${opacityClass} -translate-x-1/2 -translate-y-1/2 shadow-[0_0_10px_rgba(255,255,255,0.8)]`} />
-      <div className={`absolute top-[60%] left-[75%] w-16 h-16 border ${borderClass} -translate-x-1/2 -translate-y-1/2 rounded-full flex items-center justify-center`}>
+      <div className={`absolute top-[25%] left-[40%] w-2 h-2 ${opacityClass} -translate-x-1/2 -translate-y-1/2 shadow-[0_0_10px_rgba(255,255,255,0.8)] hidden sm:block`} />
+      <div className={`absolute top-[60%] right-[3%] sm:right-[max(1.5rem,3%)] w-12 h-12 sm:w-16 sm:h-16 border ${borderClass} translate-x-1/2 -translate-y-1/2 rounded-full flex items-center justify-center`}>
         <div className={`w-1 h-1 ${pulseClass} rounded-full animate-pulse`} />
       </div>
       
-      <div className={`absolute top-[92%] left-[3%] text-[8px] font-montserrat ${textClass} -translate-y-full pl-3 pb-1 tracking-[0.2em] uppercase`}>IT_INFRA</div>
-      <div className={`absolute top-[25%] left-[97%] text-[8px] font-montserrat ${textClass} -translate-y-full -translate-x-full pr-3 pb-1 tracking-[0.2em] uppercase`}>AI_CORE</div>
-      <div className={`absolute top-[60%] left-[3%] text-[8px] font-montserrat ${textClass} translate-y-2 pl-3 tracking-[0.2em] uppercase`}>SEC_NODE</div>
+      <div className={`absolute top-[92%] left-[max(1.5rem,3%)] text-[6px] sm:text-[8px] font-montserrat ${textClass} -translate-y-full pl-2 sm:pl-3 pb-1 tracking-[0.2em] uppercase`}>IT_INFRA</div>
+      <div className={`absolute top-[25%] right-[max(1.5rem,3%)] text-[6px] sm:text-[8px] font-montserrat ${textClass} -translate-y-full pr-2 sm:pr-3 pb-1 tracking-[0.2em] uppercase`}>AI_CORE</div>
+      <div className={`absolute top-[60%] left-[max(1.5rem,3%)] text-[6px] sm:text-[8px] font-montserrat ${textClass} translate-y-2 pl-2 sm:pl-3 tracking-[0.2em] uppercase`}>SEC_NODE</div>
       
-      <div className={`absolute top-0 left-[40%] w-[1px] h-[200%] ${opacityClass}/5 origin-top-left -rotate-[35deg]`} />
+      <div className={`absolute top-0 left-[40%] w-[1px] h-[200%] ${opacityClass}/5 origin-top-left -rotate-[35deg] hidden sm:block`} />
     </>
   );
 };
@@ -468,7 +478,7 @@ const HeroBackground = ({ mouseX, mouseY }) => {
       </div>
 
       <motion.div 
-        className="absolute inset-0 w-full h-full opacity-100"
+        className="absolute inset-0 w-full h-full opacity-100 hidden md:block"
         style={{
           maskImage: useMotionTemplate`radial-gradient(600px circle at ${mouseX}px ${mouseY}px, rgba(255,255,255,1), rgba(255,255,255,0) 60%)`,
           WebkitMaskImage: useMotionTemplate`radial-gradient(600px circle at ${mouseX}px ${mouseY}px, rgba(255,255,255,1), rgba(255,255,255,0) 60%)`
@@ -485,12 +495,12 @@ const StatementBackground = () => {
   const yParallax = useTransform(scrollYProgress, [0, 1], [0, -150]);
   
   return (
-    <div className="absolute inset-0 z-0 w-full h-full overflow-hidden pointer-events-none opacity-40">
+    <div className="absolute inset-0 z-0 w-full h-full overflow-hidden pointer-events-none opacity-40 hidden sm:block">
       <motion.div style={{ y: yParallax }} className="absolute inset-0 w-full h-full">
         <div className="absolute left-[3%] top-0 bottom-0 w-[1px] bg-black/10" />
         <div className="absolute left-[25%] top-0 bottom-0 w-[1px] bg-black/5" />
         <div className="absolute left-[65%] top-0 bottom-0 w-[1px] bg-black/5" />
-        <div className="absolute left-[97%] top-0 bottom-0 w-[1px] bg-black/10" />
+        <div className="absolute right-[3%] top-0 bottom-0 w-[1px] bg-black/10" />
         
         <div className="absolute top-[15%] left-0 right-0 h-[1px] bg-black/5" />
         <div className="absolute top-[45%] left-0 right-0 h-[1px] bg-black/10" />
@@ -502,14 +512,13 @@ const StatementBackground = () => {
           transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
         />
         <motion.div 
-          className="absolute left-[97%] top-0 w-[1px] h-48 bg-black/30"
+          className="absolute right-[3%] top-0 w-[1px] h-48 bg-black/30"
           animate={{ top: ["110%", "-10%"] }}
           transition={{ duration: 12, repeat: Infinity, ease: "linear" }}
         />
         
         <div className="absolute top-[45%] left-[25%] w-1.5 h-1.5 bg-black -translate-x-1/2 -translate-y-1/2" />
         <div className="absolute top-[15%] left-[65%] w-1 h-1 bg-black/40 -translate-x-1/2 -translate-y-1/2" />
-        <div className="absolute top-[75%] left-[3%] text-[7px] font-montserrat text-black/30 -translate-y-full pl-2 tracking-widest uppercase">DATA_LINK_04</div>
       </motion.div>
     </div>
   );
@@ -517,15 +526,15 @@ const StatementBackground = () => {
 
 const Hero = ({ onNavigate }) => {
   const { scrollY } = useScroll();
-  const y = useTransform(scrollY, [0, 1000], [0, 250]);
+  const y = useTransform(scrollY, [0, 1000], [0, 150]);
   const opacity = useTransform(scrollY, [0, 500], [1, 0]);
   
   const mouseX = useMotionValue(typeof window !== "undefined" ? window.innerWidth / 2 : 0);
   const mouseY = useMotionValue(typeof window !== "undefined" ? window.innerHeight / 2 : 0);
 
   const springConfig = { damping: 25, stiffness: 150, mass: 0.5 };
-  const textX = useSpring(useTransform(mouseX, [0, typeof window !== "undefined" ? window.innerWidth : 1000], [15, -15]), springConfig);
-  const textY = useSpring(useTransform(mouseY, [0, typeof window !== "undefined" ? window.innerHeight : 1000], [15, -15]), springConfig);
+  const textX = useSpring(useTransform(mouseX, [0, typeof window !== "undefined" ? window.innerWidth : 1000], [10, -10]), springConfig);
+  const textY = useSpring(useTransform(mouseY, [0, typeof window !== "undefined" ? window.innerHeight : 1000], [10, -10]), springConfig);
 
   const handleMouseMove = ({ clientX, clientY }) => {
     mouseX.set(clientX);
@@ -533,44 +542,45 @@ const Hero = ({ onNavigate }) => {
   };
 
   return (
-    <section className="relative h-screen flex flex-col justify-center overflow-hidden bg-black" onMouseMove={handleMouseMove}>
+    <section className="relative h-[100svh] min-h-[600px] flex flex-col justify-center overflow-hidden bg-black" onMouseMove={handleMouseMove}>
       <HeroBackground mouseX={mouseX} mouseY={mouseY} />
       
       <motion.div 
-        style={{ y, opacity, paddingLeft: '3%', paddingRight: '3%' }} 
-        className="w-full relative z-10 flex flex-col items-start mt-12 md:mt-24 pointer-events-none"
+        style={{ y, opacity, paddingLeft: 'max(1.5rem, 3%)', paddingRight: 'max(1.5rem, 3%)' }} 
+        className="w-full relative z-10 flex flex-col items-start pointer-events-none mt-8 md:mt-24"
       >
-        <div className="mb-8 flex items-center gap-6 overflow-hidden">
+        <div className="mb-6 md:mb-8 flex items-center gap-4 sm:gap-6 overflow-hidden">
           <motion.div 
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
             transition={{ duration: 0.5, delay: 0.4 }}
-            className="w-1.5 h-1.5 rounded-full bg-white animate-pulse"
+            className="w-1 h-1 sm:w-1.5 sm:h-1.5 rounded-full bg-white animate-pulse"
           />
           <motion.div 
             initial={{ x: -50, opacity: 0 }}
             animate={{ x: 0, opacity: 1 }}
             transition={{ duration: 0.8, delay: 0.5 }}
-            className="w-12 h-[1px] bg-white/40"
+            className="w-8 sm:w-12 h-[1px] bg-white/40"
           />
           <motion.span 
             initial={{ y: 20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ duration: 0.8, delay: 0.6 }}
-            className="font-montserrat text-[9px] md:text-[10px] tracking-[0.4em] uppercase text-neutral-400"
+            className="font-montserrat text-[8px] sm:text-[9px] md:text-[10px] tracking-[0.4em] uppercase text-neutral-400"
           >
             Enterprise IT & AI Solutions
           </motion.span>
         </div>
 
+        {/* Clamped typography scale for flawless rendering across all devices */}
         <motion.div 
           style={{ x: textX, y: textY }}
           initial={{ opacity: 0, y: 40 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
-          className="flex flex-col font-bebas text-[22vw] md:text-[18vw] leading-[0.75] mb-8 w-full"
+          className="flex flex-col font-bebas text-[20vw] sm:text-[16vw] lg:text-[11vw] leading-[0.8] md:leading-[0.75] mb-6 sm:mb-8 w-full"
         >
-          <div className="overflow-hidden py-2">
+          <div className="overflow-hidden py-1 md:py-2">
             <motion.div 
               initial={{y: "100%"}} 
               animate={{y: 0}} 
@@ -580,13 +590,13 @@ const Hero = ({ onNavigate }) => {
               Smarter IT.
             </motion.div>
           </div>
-          <div className="overflow-hidden py-2 flex items-center gap-4">
+          <div className="overflow-hidden py-1 md:py-2 flex items-center gap-2 sm:gap-4">
             <motion.div 
               initial={{y: "100%"}} 
               animate={{y: 0}} 
               transition={{delay: 0.2, duration: 1, ease: [0.76, 0, 0.24, 1]}} 
-              className="text-transparent pl-2 md:pl-12" 
-              style={{ WebkitTextStroke: "2px rgba(255,255,255,0.9)" }}
+              className="text-transparent pl-1 sm:pl-4 md:pl-12" 
+              style={{ WebkitTextStroke: "max(1px, 0.15vw) rgba(255,255,255,0.9)" }}
             >
               Better AI.
             </motion.div>
@@ -597,7 +607,7 @@ const Hero = ({ onNavigate }) => {
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 1, delay: 0.8 }}
-          className="font-montserrat text-[11px] md:text-xs text-neutral-400 max-w-md font-light mb-12 leading-relaxed border-l border-white/20 pl-6"
+          className="font-montserrat text-[10px] sm:text-[11px] md:text-xs text-neutral-400 max-w-[280px] sm:max-w-sm md:max-w-md font-light mb-8 sm:mb-12 leading-relaxed border-l border-white/20 pl-4 sm:pl-6"
         >
           We build industry-leading IT infrastructure and highly effective AI systems. We eliminate inefficiencies and build tech that actually works. Plain and simple, we give your business a massive competitive edge.
         </motion.p>
@@ -606,7 +616,7 @@ const Hero = ({ onNavigate }) => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 1 }}
-          className="pointer-events-auto flex flex-col sm:flex-row items-start sm:items-center gap-4"
+          className="pointer-events-auto flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4 w-full sm:w-auto"
         >
           <EliteButton onClick={() => onNavigate('contact')}>
             Start a Project
@@ -626,21 +636,21 @@ const Hero = ({ onNavigate }) => {
 const Statement = () => {
   return (
     <section 
-      className="py-40 md:py-64 bg-white text-black overflow-hidden relative"
-      style={{ paddingLeft: '3%', paddingRight: '3%' }}
+      className="py-32 sm:py-40 md:py-64 bg-white text-black overflow-hidden relative"
+      style={{ paddingLeft: 'max(1.5rem, 3%)', paddingRight: 'max(1.5rem, 3%)' }}
     >
       <StatementBackground />
       
       <div className="w-full relative z-10">
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-1 sm:gap-2">
           
           <div className="overflow-hidden">
             <motion.h2 
               initial={{ y: "100%" }}
               whileInView={{ y: 0 }}
               transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
-              viewport={{ once: true, margin: "-100px" }}
-              className="font-bebas text-[14vw] md:text-[10vw] leading-[0.8] uppercase text-black"
+              viewport={{ once: true, margin: "-50px" }}
+              className="font-bebas text-[16vw] sm:text-[14vw] md:text-[10vw] leading-[0.85] sm:leading-[0.8] uppercase text-black"
             >
               Elite IT.
             </motion.h2>
@@ -651,8 +661,8 @@ const Statement = () => {
               initial={{ y: "100%" }}
               whileInView={{ y: 0 }}
               transition={{ duration: 1, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
-              viewport={{ once: true, margin: "-100px" }}
-              className="font-bebas text-[14vw] md:text-[10vw] leading-[0.8] uppercase text-outline-dark"
+              viewport={{ once: true, margin: "-50px" }}
+              className="font-bebas text-[16vw] sm:text-[14vw] md:text-[10vw] leading-[0.85] sm:leading-[0.8] uppercase text-outline-dark"
             >
               Scalable AI.
             </motion.h2>
@@ -663,20 +673,20 @@ const Statement = () => {
               initial={{ y: "100%" }}
               whileInView={{ y: 0 }}
               transition={{ duration: 1, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
-              viewport={{ once: true, margin: "-100px" }}
-              className="font-bebas text-[14vw] md:text-[10vw] leading-[0.8] uppercase text-black"
+              viewport={{ once: true, margin: "-50px" }}
+              className="font-bebas text-[16vw] sm:text-[14vw] md:text-[10vw] leading-[0.85] sm:leading-[0.8] uppercase text-black"
             >
               Proven Results.
             </motion.h2>
           </div>
 
-          <div className="mt-16 flex flex-col md:flex-row md:items-end justify-between gap-12 pt-12 border-t border-black/10">
+          <div className="mt-10 sm:mt-16 flex flex-col md:flex-row md:items-end justify-between gap-8 sm:gap-12 pt-8 sm:pt-12 border-t border-black/10">
              <motion.p 
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 1, delay: 0.5 }}
+              transition={{ duration: 1, delay: 0.3 }}
               viewport={{ once: true }}
-              className="font-montserrat text-[10px] md:text-xs text-neutral-500 max-w-md leading-relaxed uppercase tracking-[0.2em]"
+              className="font-montserrat text-[10px] sm:text-xs text-neutral-500 max-w-[280px] sm:max-w-md leading-relaxed uppercase tracking-[0.2em]"
             >
               We deliver the best IT engineering and AI automation for growing enterprises. No jargon, just reliable systems built to scale. We are the best at what we do.
             </motion.p>
@@ -684,9 +694,9 @@ const Statement = () => {
             <motion.div 
                initial={{ scaleX: 0 }}
                whileInView={{ scaleX: 1 }}
-               transition={{ duration: 1.5, delay: 0.6 }}
+               transition={{ duration: 1.5, delay: 0.4 }}
                viewport={{ once: true }}
-               className="h-[1px] bg-black w-24 origin-left hidden md:block"
+               className="h-[1px] bg-black w-16 sm:w-24 origin-left"
             />
           </div>
 
@@ -714,12 +724,12 @@ const Work = () => {
   return (
     <section 
       id="work" 
-      className="py-32 w-full relative"
-      style={{ paddingLeft: '3%', paddingRight: '3%' }}
+      className="py-24 sm:py-32 w-full relative"
+      style={{ paddingLeft: 'max(1.5rem, 3%)', paddingRight: 'max(1.5rem, 3%)' }}
     >
-      <div className="mb-20 flex justify-between items-end border-b border-white/20 pb-6">
-        <h2 className="font-montserrat text-xs font-bold tracking-widest uppercase">Solution Index</h2>
-        <span className="font-montserrat text-[10px] text-neutral-500">(04)</span>
+      <div className="mb-12 sm:mb-20 flex justify-between items-end border-b border-white/20 pb-4 sm:pb-6">
+        <h2 className="font-montserrat text-[10px] sm:text-xs font-bold tracking-widest uppercase">Solution Index</h2>
+        <span className="font-montserrat text-[9px] sm:text-[10px] text-neutral-500">(04)</span>
       </div>
 
       <div className="flex flex-col relative z-10 w-full">
@@ -728,17 +738,17 @@ const Work = () => {
             key={i}
             onMouseEnter={() => setHoveredIndex(i)}
             onMouseLeave={() => setHoveredIndex(null)}
-            className="group flex flex-col md:flex-row md:items-center justify-between py-10 border-b border-white/10 cursor-pointer hover-trigger transition-colors duration-500 hover:border-white"
+            className="group flex flex-col md:flex-row md:items-center justify-between py-6 sm:py-10 border-b border-white/10 cursor-pointer hover-trigger transition-colors duration-500 hover:border-white"
           >
-            <div className="flex items-center gap-6 md:gap-12">
-              <span className="font-montserrat text-xs text-neutral-600 transition-colors group-hover:text-white">0{i+1}</span>
-              <h3 className="font-bebas text-6xl md:text-[8vw] uppercase text-outline leading-none group-hover:text-white group-hover:-webkit-text-stroke-[0px]">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-6 md:gap-12">
+              <span className="font-montserrat text-[10px] sm:text-xs text-neutral-600 transition-colors group-hover:text-white">0{i+1}</span>
+              <h3 className="font-bebas text-4xl sm:text-6xl md:text-[8vw] uppercase md:text-outline leading-none group-hover:text-white group-hover:-webkit-text-stroke-[0px]">
                 {project.name}
               </h3>
             </div>
-            <div className="flex items-center gap-8 mt-2 md:mt-0 opacity-0 group-hover:opacity-100 transition-all duration-300 translate-y-2 group-hover:translate-y-0">
-              <span className="font-montserrat text-[10px] tracking-[0.2em] uppercase text-neutral-400">{project.category}</span>
-              <span className="font-montserrat text-[10px]">{project.year}</span>
+            <div className="flex items-center gap-8 mt-4 md:mt-0 opacity-60 md:opacity-0 group-hover:opacity-100 transition-all duration-300 md:translate-y-2 group-hover:translate-y-0">
+              <span className="font-montserrat text-[9px] sm:text-[10px] tracking-[0.2em] uppercase text-neutral-400">{project.category}</span>
+              <span className="font-montserrat text-[9px] sm:text-[10px]">{project.year}</span>
             </div>
           </div>
         ))}
@@ -779,32 +789,32 @@ const Capabilities = () => {
   return (
     <section 
       id="capabilities" 
-      className="py-32 bg-white text-black"
-      style={{ paddingLeft: '3%', paddingRight: '3%' }}
+      className="py-24 sm:py-32 bg-white text-black"
+      style={{ paddingLeft: 'max(1.5rem, 3%)', paddingRight: 'max(1.5rem, 3%)' }}
     >
-      <div className="w-full flex flex-col lg:flex-row justify-between items-start gap-16">
+      <div className="w-full flex flex-col lg:flex-row justify-between items-start gap-12 sm:gap-16">
         
         <div className="lg:w-1/3 sticky top-40">
-          <h2 className="font-bebas text-[8vw] md:text-[6vw] leading-none uppercase mb-6 text-black">Core Capabilities.</h2>
+          <h2 className="font-bebas text-[12vw] sm:text-[8vw] md:text-[6vw] leading-none uppercase mb-4 sm:mb-6 text-black">Core Capabilities.</h2>
           <p className="font-montserrat text-xs text-neutral-500 max-w-[280px] leading-relaxed">
             We are industry leaders in IT modernization and AI deployment. We don't just upgrade software; we fundamentally improve how your business operates.
           </p>
         </div>
 
-        <div className="lg:w-1/2 flex flex-col w-full mt-12 lg:mt-0">
+        <div className="lg:w-1/2 flex flex-col w-full mt-4 lg:mt-0">
           {items.map((item, i) => (
             <motion.div 
               key={i}
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-100px" }}
+              viewport={{ once: true, margin: "-50px" }}
               transition={{ duration: 0.5, delay: i * 0.1 }}
-              className="py-8 border-b border-black/20 hover:border-black flex justify-between items-center group cursor-pointer transition-colors"
+              className="py-6 sm:py-8 border-b border-black/20 hover:border-black flex justify-between items-center group cursor-pointer transition-colors"
             >
-              <h3 className="font-bebas text-4xl md:text-6xl uppercase transition-transform duration-300 group-hover:translate-x-4">
+              <h3 className="font-bebas text-3xl sm:text-4xl md:text-6xl uppercase md:transition-transform md:duration-300 md:group-hover:translate-x-4">
                 {item}
               </h3>
-              <ArrowRight className="opacity-0 group-hover:opacity-100 transition-opacity -translate-x-4 group-hover:translate-x-0 duration-300 w-6 h-6" />
+              <ArrowRight className="opacity-0 md:group-hover:opacity-100 transition-opacity md:-translate-x-4 md:group-hover:translate-x-0 duration-300 w-5 h-5 sm:w-6 sm:h-6 hidden md:block" />
             </motion.div>
           ))}
         </div>
@@ -836,7 +846,6 @@ const WorkflowAnalyzer = () => {
     setAnalyzing(true);
     setTimeout(() => {
       let score = 75 + Math.floor(Math.random() * 20); // 75-95%
-      
       let arch = "CLOUD AI + DATA LAKE INFRASTRUCTURE";
       if (data.friction.includes('Visual')) arch = "EDGE VISION KERNELS + K8S ARRAY";
       if (data.friction.includes('Silos')) arch = "DISTRIBUTED RAG + VECTOR SHARDING";
@@ -856,32 +865,30 @@ const WorkflowAnalyzer = () => {
 
   return (
     <div className="w-full min-h-[420px]">
-      <div className="flex flex-col lg:flex-row gap-16">
-        {/* Left Side: Analyzer Context */}
+      <div className="flex flex-col lg:flex-row gap-10 sm:gap-16">
         <div className="lg:w-1/3">
-          <h2 className="font-bebas text-4xl text-white uppercase leading-none mb-4">Automation Auditor</h2>
-          <p className="font-montserrat text-xs text-neutral-500 leading-relaxed mb-8">
+          <h2 className="font-bebas text-3xl sm:text-4xl text-white uppercase leading-none mb-4">Automation Auditor</h2>
+          <p className="font-montserrat text-[10px] sm:text-xs text-neutral-500 leading-relaxed mb-6 sm:mb-8">
             Complete this 5-stage diagnostic. Our engine will calculate your operational friction and propose a custom, enterprise-grade AI architecture.
           </p>
-          <div className="h-[1px] bg-white/10 w-full mb-8" />
-          <div className="font-mono text-[9px] text-neutral-600 space-y-1">
+          <div className="h-[1px] bg-white/10 w-full mb-6 sm:mb-8" />
+          <div className="font-mono text-[8px] sm:text-[9px] text-neutral-600 space-y-1">
             <p>AUDIT ID: 0x{Math.floor(Math.random()*16777215).toString(16).toUpperCase()}</p>
             <p>PHASE: 0{step} OF 05</p>
           </div>
         </div>
 
-        {/* Right Side: Interactive Steps */}
-        <div className="lg:w-2/3 bg-black border border-white/5 p-8 flex flex-col justify-center relative overflow-hidden">
+        <div className="lg:w-2/3 bg-[#050505] border border-white/5 p-6 sm:p-8 flex flex-col justify-center relative overflow-hidden min-h-[380px]">
           <AnimatePresence mode="wait">
             
             {step === 1 && !analyzing && (
               <motion.div key="step1" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="flex flex-col gap-6 w-full">
-                <h3 className="font-bebas text-2xl text-white uppercase">01 // Identify Primary Strategic Objective</h3>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <h3 className="font-bebas text-xl sm:text-2xl text-white uppercase">01 // Identify Primary Strategic Objective</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                   {['Maximize Compute Throughput', 'Eradicate Human Error', 'Slash Operational Overhead', 'Modernize Legacy Infrastructure'].map(opt => (
                     <button 
                       key={opt} onClick={() => setData({...data, objective: opt})}
-                      className={`py-4 px-4 text-left border text-[10px] font-montserrat tracking-widest uppercase transition-all ${data.objective === opt ? 'border-white text-black bg-white' : 'border-white/10 text-neutral-500 hover:border-white/30 hover:text-white'}`}
+                      className={`py-3 sm:py-4 px-4 text-left border text-[9px] sm:text-[10px] font-montserrat tracking-widest uppercase transition-all active:scale-[0.98] ${data.objective === opt ? 'border-white text-black bg-white' : 'border-white/10 text-neutral-500 md:hover:border-white/30 md:hover:text-white'}`}
                     >
                       {opt}
                     </button>
@@ -895,19 +902,19 @@ const WorkflowAnalyzer = () => {
 
             {step === 2 && !analyzing && (
               <motion.div key="step2" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="flex flex-col gap-6 w-full">
-                <h3 className="font-bebas text-2xl text-white uppercase">02 // Select Core Data Friction</h3>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <h3 className="font-bebas text-xl sm:text-2xl text-white uppercase">02 // Select Core Data Friction</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                   {['Fragmented Database Silos', 'High-Volume Unstructured Text', 'Real-Time Processing Bottlenecks', 'Complex Visual/Spatial Pipelines'].map(opt => (
                     <button 
                       key={opt} onClick={() => setData({...data, friction: opt})}
-                      className={`py-4 px-4 text-left border text-[10px] font-montserrat tracking-widest uppercase transition-all ${data.friction === opt ? 'border-white text-black bg-white' : 'border-white/10 text-neutral-500 hover:border-white/30 hover:text-white'}`}
+                      className={`py-3 sm:py-4 px-4 text-left border text-[9px] sm:text-[10px] font-montserrat tracking-widest uppercase transition-all active:scale-[0.98] ${data.friction === opt ? 'border-white text-black bg-white' : 'border-white/10 text-neutral-500 md:hover:border-white/30 md:hover:text-white'}`}
                     >
                       {opt}
                     </button>
                   ))}
                 </div>
-                <div className="mt-4 flex justify-between items-center">
-                  <button onClick={() => setStep(1)} className="font-montserrat text-[10px] uppercase tracking-widest text-neutral-500 hover:text-white">Go Back</button>
+                <div className="mt-4 flex justify-between items-center gap-4">
+                  <button onClick={() => setStep(1)} className="font-montserrat text-[9px] sm:text-[10px] uppercase tracking-widest text-neutral-500 hover:text-white shrink-0">Go Back</button>
                   <EliteButton variant="secondary" onClick={() => setStep(3)} disabled={!isStepValid()}>Next Phase</EliteButton>
                 </div>
               </motion.div>
@@ -915,19 +922,19 @@ const WorkflowAnalyzer = () => {
 
             {step === 3 && !analyzing && (
               <motion.div key="step3" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="flex flex-col gap-6 w-full">
-                <h3 className="font-bebas text-2xl text-white uppercase">03 // Assess Current Technical Debt</h3>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  {['Severe (Frequent System Failures)', 'Moderate (Patchwork of Legacy Apps)', 'Light (Requires Optimization)', 'None (Greenfield Project)'].map(opt => (
+                <h3 className="font-bebas text-xl sm:text-2xl text-white uppercase">03 // Assess Current Technical Debt</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                  {['Severe (Frequent Failures)', 'Moderate (Legacy Apps)', 'Light (Needs Optimization)', 'None (Greenfield)'].map(opt => (
                     <button 
                       key={opt} onClick={() => setData({...data, debt: opt})}
-                      className={`py-4 px-4 text-left border text-[10px] font-montserrat tracking-widest uppercase transition-all ${data.debt === opt ? 'border-white text-black bg-white' : 'border-white/10 text-neutral-500 hover:border-white/30 hover:text-white'}`}
+                      className={`py-3 sm:py-4 px-4 text-left border text-[9px] sm:text-[10px] font-montserrat tracking-widest uppercase transition-all active:scale-[0.98] ${data.debt === opt ? 'border-white text-black bg-white' : 'border-white/10 text-neutral-500 md:hover:border-white/30 md:hover:text-white'}`}
                     >
                       {opt}
                     </button>
                   ))}
                 </div>
-                <div className="mt-4 flex justify-between items-center">
-                  <button onClick={() => setStep(2)} className="font-montserrat text-[10px] uppercase tracking-widest text-neutral-500 hover:text-white">Go Back</button>
+                <div className="mt-4 flex justify-between items-center gap-4">
+                  <button onClick={() => setStep(2)} className="font-montserrat text-[9px] sm:text-[10px] uppercase tracking-widest text-neutral-500 hover:text-white shrink-0">Go Back</button>
                   <EliteButton variant="secondary" onClick={() => setStep(4)} disabled={!isStepValid()}>Next Phase</EliteButton>
                 </div>
               </motion.div>
@@ -935,9 +942,9 @@ const WorkflowAnalyzer = () => {
 
             {step === 4 && !analyzing && (
               <motion.div key="step4" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="flex flex-col gap-8 w-full">
-                <h3 className="font-bebas text-2xl text-white uppercase">04 // Define Operational Scale (Daily Queries/Tasks)</h3>
+                <h3 className="font-bebas text-xl sm:text-2xl text-white uppercase">04 // Define Operational Scale</h3>
                 <div className="w-full">
-                  <div className="flex justify-between font-montserrat text-[10px] text-neutral-400 font-bold uppercase tracking-wider mb-4">
+                  <div className="flex justify-between font-montserrat text-[9px] sm:text-[10px] text-neutral-400 font-bold uppercase tracking-wider mb-4">
                     <span>{data.volume}K QUERIES</span>
                     <span>10M+ QUERIES</span>
                   </div>
@@ -947,8 +954,8 @@ const WorkflowAnalyzer = () => {
                     className="w-full h-[2px] bg-neutral-800 appearance-none cursor-pointer accent-white"
                   />
                 </div>
-                <div className="mt-4 flex justify-between items-center">
-                  <button onClick={() => setStep(3)} className="font-montserrat text-[10px] uppercase tracking-widest text-neutral-500 hover:text-white">Go Back</button>
+                <div className="mt-4 flex justify-between items-center gap-4">
+                  <button onClick={() => setStep(3)} className="font-montserrat text-[9px] sm:text-[10px] uppercase tracking-widest text-neutral-500 hover:text-white shrink-0">Go Back</button>
                   <EliteButton variant="secondary" onClick={() => setStep(5)}>Next Phase</EliteButton>
                 </div>
               </motion.div>
@@ -956,20 +963,20 @@ const WorkflowAnalyzer = () => {
 
             {step === 5 && !analyzing && (
               <motion.div key="step5" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="flex flex-col gap-6 w-full">
-                <h3 className="font-bebas text-2xl text-white uppercase">05 // Target Deployment Horizon</h3>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  {['Immediate Execution (Q1)', 'Near-Term Strategy (Q2-Q3)', 'Long-Term Horizon (Q4+)', 'Exploratory Phase'].map(opt => (
+                <h3 className="font-bebas text-xl sm:text-2xl text-white uppercase">05 // Target Deployment Horizon</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                  {['Immediate Execution', 'Near-Term (Q2-Q3)', 'Long-Term (Q4+)', 'Exploratory Phase'].map(opt => (
                     <button 
                       key={opt} onClick={() => setData({...data, timeline: opt})}
-                      className={`py-4 px-4 text-left border text-[10px] font-montserrat tracking-widest uppercase transition-all ${data.timeline === opt ? 'border-white text-black bg-white' : 'border-white/10 text-neutral-500 hover:border-white/30 hover:text-white'}`}
+                      className={`py-3 sm:py-4 px-4 text-left border text-[9px] sm:text-[10px] font-montserrat tracking-widest uppercase transition-all active:scale-[0.98] ${data.timeline === opt ? 'border-white text-black bg-white' : 'border-white/10 text-neutral-500 md:hover:border-white/30 md:hover:text-white'}`}
                     >
                       {opt}
                     </button>
                   ))}
                 </div>
-                <div className="mt-4 flex justify-between items-center">
-                  <button onClick={() => setStep(4)} className="font-montserrat text-[10px] uppercase tracking-widest text-neutral-500 hover:text-white">Go Back</button>
-                  <EliteButton onClick={runAnalysis} disabled={!isStepValid()}>Analyze Workflow</EliteButton>
+                <div className="mt-4 flex justify-between items-center gap-4">
+                  <button onClick={() => setStep(4)} className="font-montserrat text-[9px] sm:text-[10px] uppercase tracking-widest text-neutral-500 hover:text-white shrink-0">Go Back</button>
+                  <EliteButton onClick={runAnalysis} disabled={!isStepValid()}>Analyze</EliteButton>
                 </div>
               </motion.div>
             )}
@@ -977,10 +984,9 @@ const WorkflowAnalyzer = () => {
             {analyzing && (
               <motion.div key="analyzing" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex flex-col items-center justify-center gap-6 py-12">
                 <div className="absolute left-0 w-full h-32 pointer-events-none z-0 scanning-bar opacity-20" />
-                <Terminal className="text-white w-8 h-8 animate-pulse relative z-10" />
-                <h3 className="font-bebas text-3xl text-white uppercase relative z-10"><ScrambleText text="CALCULATING IT POTENTIAL..." trigger={analyzing} /></h3>
-                <div className="font-mono text-[9px] text-neutral-500 text-center space-y-2 relative z-10">
-                  <p>ISOLATING BOTTLENECK...</p>
+                <Terminal className="text-white w-6 h-6 sm:w-8 sm:h-8 animate-pulse relative z-10" />
+                <h3 className="font-bebas text-2xl sm:text-3xl text-white uppercase relative z-10 text-center"><ScrambleText text="CALCULATING POTENTIAL..." trigger={analyzing} /></h3>
+                <div className="font-mono text-[8px] sm:text-[9px] text-neutral-500 text-center space-y-2 relative z-10">
                   <p>MAPPING DATA ARCHITECTURE...</p>
                   <p>ESTIMATING LOAD: {data.volume}K OPS/DAY</p>
                 </div>
@@ -990,20 +996,20 @@ const WorkflowAnalyzer = () => {
             {step === 6 && result && !analyzing && (
               <motion.div key="result" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="flex flex-col gap-6 w-full">
                 <div className="flex items-center gap-3">
-                  <CheckCircle2 className="text-white w-6 h-6" />
-                  <h3 className="font-bebas text-3xl text-white uppercase">AUDIT COMPLETE</h3>
+                  <CheckCircle2 className="text-white w-5 h-5 sm:w-6 sm:h-6" />
+                  <h3 className="font-bebas text-2xl sm:text-3xl text-white uppercase">AUDIT COMPLETE</h3>
                 </div>
-                <div className="p-6 border border-white/10 bg-white/5 flex justify-between items-center">
-                  <span className="font-montserrat text-[10px] tracking-widest text-neutral-400 uppercase">AUTOMATION PROBABILITY</span>
-                  <span className="font-bebas text-5xl text-white tracking-widest">{result.score}%</span>
+                <div className="p-4 sm:p-6 border border-white/10 bg-white/5 flex flex-col sm:flex-row justify-between sm:items-center gap-2">
+                  <span className="font-montserrat text-[9px] sm:text-[10px] tracking-widest text-neutral-400 uppercase">AUTOMATION PROBABILITY</span>
+                  <span className="font-bebas text-4xl sm:text-5xl text-white tracking-widest">{result.score}%</span>
                 </div>
-                <div className="p-6 border border-white/10 flex flex-col gap-2">
-                  <span className="font-montserrat text-[9px] tracking-widest text-neutral-500 uppercase">RECOMMENDED IT & AI STACK</span>
-                  <span className="font-bebas text-2xl text-white tracking-wider">{result.arch}</span>
+                <div className="p-4 sm:p-6 border border-white/10 flex flex-col gap-2">
+                  <span className="font-montserrat text-[8px] sm:text-[9px] tracking-widest text-neutral-500 uppercase">RECOMMENDED IT & AI STACK</span>
+                  <span className="font-bebas text-xl sm:text-2xl text-white tracking-wider">{result.arch}</span>
                 </div>
-                <div className="mt-4 flex justify-between items-center border-t border-white/10 pt-6">
-                  <button onClick={reset} className="font-montserrat text-[9px] tracking-widest uppercase text-neutral-500 hover:text-white">Run New Audit</button>
-                  <a href="#contact" className="font-montserrat text-[10px] font-bold text-white tracking-widest uppercase underline underline-offset-4">Get Detailed Blueprint</a>
+                <div className="mt-4 flex flex-col sm:flex-row justify-between sm:items-center border-t border-white/10 pt-6 gap-4">
+                  <button onClick={reset} className="font-montserrat text-[8px] sm:text-[9px] tracking-widest uppercase text-neutral-500 hover:text-white">Run New Audit</button>
+                  <a href="#contact" className="font-montserrat text-[9px] sm:text-[10px] font-bold text-white tracking-widest uppercase underline underline-offset-4">Get Detailed Blueprint</a>
                 </div>
               </motion.div>
             )}
@@ -1033,7 +1039,6 @@ const ROICalculator = () => {
   const runAnalysis = () => {
     setAnalyzing(true);
     setTimeout(() => {
-      // Logic: Generic setups cost more, bare metal / optimized saves money
       let savingsMultiplier = 0.35; // base 35% savings
       if (data.setup.includes('Legacy')) savingsMultiplier = 0.55;
       if (data.setup.includes('Fragmented')) savingsMultiplier = 0.45;
@@ -1059,36 +1064,29 @@ const ROICalculator = () => {
 
   return (
     <div className="w-full min-h-[420px]">
-      <div className="flex flex-col lg:flex-row gap-16">
-        {/* Left Side */}
+      <div className="flex flex-col lg:flex-row gap-10 sm:gap-16">
         <div className="lg:w-1/3">
-          <div className="flex items-center gap-2 mb-6">
-            <span className="w-2 h-2 bg-white animate-pulse" />
-            <span className="font-mono text-[9px] tracking-widest text-neutral-400 uppercase">Financial Audit</span>
-          </div>
-          <h2 className="font-bebas text-4xl text-white uppercase leading-none mb-4">Infrastructure ROI Calculator</h2>
-          <p className="font-montserrat text-xs text-neutral-500 leading-relaxed mb-8">
+          <h2 className="font-bebas text-3xl sm:text-4xl text-white uppercase leading-none mb-4">Infrastructure ROI Calculator</h2>
+          <p className="font-montserrat text-[10px] sm:text-xs text-neutral-500 leading-relaxed mb-6 sm:mb-8">
             Stop overpaying for inefficient cloud configurations. See exactly how much capital you can reclaim by modernizing your IT infrastructure with BAKR.JS.
           </p>
-          <div className="h-[1px] bg-white/10 w-full mb-8" />
-          <div className="font-mono text-[9px] text-neutral-600 space-y-1">
-            <p>ESTIMATE MODEL: ENTERPRISE TIER</p>
+          <div className="h-[1px] bg-white/10 w-full mb-6 sm:mb-8" />
+          <div className="font-mono text-[8px] sm:text-[9px] text-neutral-600 space-y-1">
             <p>PHASE: 0{step} OF 03</p>
           </div>
         </div>
 
-        {/* Right Side */}
-        <div className="lg:w-2/3 bg-black border border-white/5 p-8 flex flex-col justify-center relative overflow-hidden">
+        <div className="lg:w-2/3 bg-[#050505] border border-white/5 p-6 sm:p-8 flex flex-col justify-center relative overflow-hidden min-h-[380px]">
           <AnimatePresence mode="wait">
             
             {step === 1 && !analyzing && (
               <motion.div key="step1" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="flex flex-col gap-6 w-full">
-                <h3 className="font-bebas text-2xl text-white uppercase">01 // Current IT Setup</h3>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  {['On-Premise Legacy Servers', 'Basic Cloud (AWS/GCP/Azure)', 'Fragmented Multi-Cloud', 'No Dedicated IT Setup'].map(opt => (
+                <h3 className="font-bebas text-xl sm:text-2xl text-white uppercase">01 // Current IT Setup</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                  {['On-Premise Legacy Servers', 'Basic Cloud (AWS/GCP)', 'Fragmented Multi-Cloud', 'No Dedicated IT Setup'].map(opt => (
                     <button 
                       key={opt} onClick={() => setData({...data, setup: opt})}
-                      className={`py-4 px-4 text-left border text-[10px] font-montserrat tracking-widest uppercase transition-all ${data.setup === opt ? 'border-white text-black bg-white' : 'border-white/10 text-neutral-500 hover:border-white/30 hover:text-white'}`}
+                      className={`py-3 sm:py-4 px-4 text-left border text-[9px] sm:text-[10px] font-montserrat tracking-widest uppercase transition-all active:scale-[0.98] ${data.setup === opt ? 'border-white text-black bg-white' : 'border-white/10 text-neutral-500 md:hover:border-white/30 md:hover:text-white'}`}
                     >
                       {opt}
                     </button>
@@ -1102,12 +1100,12 @@ const ROICalculator = () => {
 
             {step === 2 && !analyzing && (
               <motion.div key="step2" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="flex flex-col gap-8 w-full">
-                <h3 className="font-bebas text-2xl text-white uppercase">02 // Monthly IT / Cloud Spend (USD)</h3>
+                <h3 className="font-bebas text-xl sm:text-2xl text-white uppercase">02 // Monthly IT / Cloud Spend (USD)</h3>
                 <div className="w-full">
-                  <div className="flex justify-between font-montserrat text-[10px] text-neutral-400 font-bold uppercase tracking-wider mb-4">
-                    <span>$5,000 / MO</span>
+                  <div className="flex justify-between font-montserrat text-[9px] sm:text-[10px] text-neutral-400 font-bold uppercase tracking-wider mb-4">
+                    <span>$5K</span>
                     <span className="text-white">${data.spend.toLocaleString()} / MO</span>
-                    <span>$250,000+ / MO</span>
+                    <span>$250K+</span>
                   </div>
                   <input 
                     type="range" min="5000" max="250000" step="5000" value={data.spend} 
@@ -1115,8 +1113,8 @@ const ROICalculator = () => {
                     className="w-full h-[2px] bg-neutral-800 appearance-none cursor-pointer accent-white"
                   />
                 </div>
-                <div className="mt-4 flex justify-between items-center">
-                  <button onClick={() => setStep(1)} className="font-montserrat text-[10px] uppercase tracking-widest text-neutral-500 hover:text-white">Go Back</button>
+                <div className="mt-4 flex justify-between items-center gap-4">
+                  <button onClick={() => setStep(1)} className="font-montserrat text-[9px] sm:text-[10px] uppercase tracking-widest text-neutral-500 hover:text-white shrink-0">Go Back</button>
                   <EliteButton variant="secondary" onClick={() => setStep(3)}>Next Phase</EliteButton>
                 </div>
               </motion.div>
@@ -1124,19 +1122,19 @@ const ROICalculator = () => {
 
             {step === 3 && !analyzing && (
               <motion.div key="step3" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="flex flex-col gap-6 w-full">
-                <h3 className="font-bebas text-2xl text-white uppercase">03 // Primary Infrastructure Goal</h3>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <h3 className="font-bebas text-xl sm:text-2xl text-white uppercase">03 // Primary Infrastructure Goal</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                   {['Drastically Reduce Costs', 'Increase Execution Speed', 'Enhance Cyber Security', 'Enable Global Scalability'].map(opt => (
                     <button 
                       key={opt} onClick={() => setData({...data, goal: opt})}
-                      className={`py-4 px-4 text-left border text-[10px] font-montserrat tracking-widest uppercase transition-all ${data.goal === opt ? 'border-white text-black bg-white' : 'border-white/10 text-neutral-500 hover:border-white/30 hover:text-white'}`}
+                      className={`py-3 sm:py-4 px-4 text-left border text-[9px] sm:text-[10px] font-montserrat tracking-widest uppercase transition-all active:scale-[0.98] ${data.goal === opt ? 'border-white text-black bg-white' : 'border-white/10 text-neutral-500 md:hover:border-white/30 md:hover:text-white'}`}
                     >
                       {opt}
                     </button>
                   ))}
                 </div>
-                <div className="mt-4 flex justify-between items-center">
-                  <button onClick={() => setStep(2)} className="font-montserrat text-[10px] uppercase tracking-widest text-neutral-500 hover:text-white">Go Back</button>
+                <div className="mt-4 flex justify-between items-center gap-4">
+                  <button onClick={() => setStep(2)} className="font-montserrat text-[9px] sm:text-[10px] uppercase tracking-widest text-neutral-500 hover:text-white shrink-0">Go Back</button>
                   <EliteButton onClick={runAnalysis} disabled={!isStepValid()}>Calculate ROI</EliteButton>
                 </div>
               </motion.div>
@@ -1145,35 +1143,28 @@ const ROICalculator = () => {
             {analyzing && (
               <motion.div key="analyzing" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex flex-col items-center justify-center gap-6 py-12">
                 <div className="absolute left-0 w-full h-32 pointer-events-none z-0 scanning-bar opacity-20" />
-                <Activity className="text-white w-8 h-8 animate-pulse relative z-10" />
-                <h3 className="font-bebas text-3xl text-white uppercase relative z-10"><ScrambleText text="CALCULATING COMPUTE EFFICIENCY..." trigger={analyzing} /></h3>
-                <div className="font-mono text-[9px] text-neutral-500 text-center space-y-2 relative z-10">
-                  <p>MAPPING CURRENT ARCHITECTURE...</p>
-                  <p>ESTIMATING RESOURCE OVERHEAD...</p>
-                </div>
+                <Activity className="text-white w-6 h-6 sm:w-8 sm:h-8 animate-pulse relative z-10" />
+                <h3 className="font-bebas text-2xl sm:text-3xl text-white uppercase relative z-10 text-center"><ScrambleText text="CALCULATING EFFICIENCY..." trigger={analyzing} /></h3>
               </motion.div>
             )}
 
             {step === 4 && result && !analyzing && (
               <motion.div key="result" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="flex flex-col gap-6 w-full">
                 <div className="flex items-center gap-3">
-                  <CheckCircle2 className="text-white w-6 h-6" />
-                  <h3 className="font-bebas text-3xl text-white uppercase">FINANCIAL AUDIT COMPLETE</h3>
+                  <CheckCircle2 className="text-white w-5 h-5 sm:w-6 sm:h-6" />
+                  <h3 className="font-bebas text-2xl sm:text-3xl text-white uppercase">AUDIT COMPLETE</h3>
                 </div>
-                
-                <div className="p-6 border border-white/10 bg-white/5 flex flex-col sm:flex-row justify-between sm:items-center gap-4">
-                  <span className="font-montserrat text-[10px] tracking-widest text-neutral-400 uppercase">PROJECTED YEARLY SAVINGS</span>
-                  <span className="font-bebas text-5xl text-white tracking-widest">${result.savings.toLocaleString()}</span>
+                <div className="p-4 sm:p-6 border border-white/10 bg-white/5 flex flex-col sm:flex-row justify-between sm:items-center gap-2">
+                  <span className="font-montserrat text-[9px] sm:text-[10px] tracking-widest text-neutral-400 uppercase">PROJECTED YEARLY SAVINGS</span>
+                  <span className="font-bebas text-4xl sm:text-5xl text-white tracking-widest">${result.savings.toLocaleString()}</span>
                 </div>
-
-                <div className="p-6 border border-white/10 flex flex-col gap-2">
-                  <span className="font-montserrat text-[9px] tracking-widest text-neutral-500 uppercase">OPTIMIZED IT STACK</span>
-                  <span className="font-bebas text-2xl text-white tracking-wider">{result.arch}</span>
+                <div className="p-4 sm:p-6 border border-white/10 flex flex-col gap-2">
+                  <span className="font-montserrat text-[8px] sm:text-[9px] tracking-widest text-neutral-500 uppercase">OPTIMIZED IT STACK</span>
+                  <span className="font-bebas text-xl sm:text-2xl text-white tracking-wider">{result.arch}</span>
                 </div>
-
-                <div className="mt-4 flex justify-between items-center border-t border-white/10 pt-6">
-                  <button onClick={reset} className="font-montserrat text-[9px] tracking-widest uppercase text-neutral-500 hover:text-white">Recalculate</button>
-                  <a href="#contact" className="font-montserrat text-[10px] font-bold text-white tracking-widest uppercase underline underline-offset-4">Claim Your Savings</a>
+                <div className="mt-4 flex flex-col sm:flex-row justify-between sm:items-center border-t border-white/10 pt-6 gap-4">
+                  <button onClick={reset} className="font-montserrat text-[8px] sm:text-[9px] tracking-widest uppercase text-neutral-500 hover:text-white">Recalculate</button>
+                  <a href="#contact" className="font-montserrat text-[9px] sm:text-[10px] font-bold text-white tracking-widest uppercase underline underline-offset-4">Claim Your Savings</a>
                 </div>
               </motion.div>
             )}
@@ -1225,36 +1216,28 @@ const SecurityScanner = () => {
 
   return (
     <div className="w-full min-h-[420px]">
-      <div className="flex flex-col lg:flex-row gap-16">
-        {/* Left Side */}
+      <div className="flex flex-col lg:flex-row gap-10 sm:gap-16">
         <div className="lg:w-1/3">
-          <div className="flex items-center gap-2 mb-6">
-            <span className="w-2 h-2 bg-red-500 animate-pulse" />
-            <span className="font-mono text-[9px] tracking-widest text-neutral-400 uppercase">Threat Audit</span>
-          </div>
-          <h2 className="font-bebas text-4xl text-white uppercase leading-none mb-4">Security Surface Scanner</h2>
-          <p className="font-montserrat text-xs text-neutral-500 leading-relaxed mb-8">
+          <h2 className="font-bebas text-3xl sm:text-4xl text-white uppercase leading-none mb-4">Security Surface Scanner</h2>
+          <p className="font-montserrat text-[10px] sm:text-xs text-neutral-500 leading-relaxed mb-6 sm:mb-8">
             Evaluate your current data handling and defensive protocols. Uncover vulnerabilities before they become critical breaches.
           </p>
-          <div className="h-[1px] bg-white/10 w-full mb-8" />
-          <div className="font-mono text-[9px] text-neutral-600 space-y-1">
+          <div className="h-[1px] bg-white/10 w-full mb-6 sm:mb-8" />
+          <div className="font-mono text-[8px] sm:text-[9px] text-neutral-600 space-y-1">
             <p>PROTOCOL: ISO-27701 CHECK</p>
-            <p>PHASE: 0{step} OF 03</p>
           </div>
         </div>
 
-        {/* Right Side */}
-        <div className="lg:w-2/3 bg-black border border-white/5 p-8 flex flex-col justify-center relative overflow-hidden">
+        <div className="lg:w-2/3 bg-[#050505] border border-white/5 p-6 sm:p-8 flex flex-col justify-center relative overflow-hidden min-h-[380px]">
           <AnimatePresence mode="wait">
-            
             {step === 1 && !analyzing && (
               <motion.div key="step1" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="flex flex-col gap-6 w-full">
-                <h3 className="font-bebas text-2xl text-white uppercase">01 // Primary Data Sensitivity Level</h3>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <h3 className="font-bebas text-xl sm:text-2xl text-white uppercase">01 // Primary Data Sensitivity Level</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                   {['Public / Marketing Data', 'Internal Operations Data', 'PII & Financial Records', 'Top Secret / Defense Data'].map(opt => (
                     <button 
                       key={opt} onClick={() => setData({...data, sensitivity: opt})}
-                      className={`py-4 px-4 text-left border text-[10px] font-montserrat tracking-widest uppercase transition-all ${data.sensitivity === opt ? 'border-white text-black bg-white' : 'border-white/10 text-neutral-500 hover:border-white/30 hover:text-white'}`}
+                      className={`py-3 sm:py-4 px-4 text-left border text-[9px] sm:text-[10px] font-montserrat tracking-widest uppercase transition-all active:scale-[0.98] ${data.sensitivity === opt ? 'border-white text-black bg-white' : 'border-white/10 text-neutral-500 md:hover:border-white/30 md:hover:text-white'}`}
                     >
                       {opt}
                     </button>
@@ -1268,19 +1251,19 @@ const SecurityScanner = () => {
 
             {step === 2 && !analyzing && (
               <motion.div key="step2" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="flex flex-col gap-6 w-full">
-                <h3 className="font-bebas text-2xl text-white uppercase">02 // Regulatory Compliance Requirements</h3>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <h3 className="font-bebas text-xl sm:text-2xl text-white uppercase">02 // Regulatory Compliance Requirements</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                   {['SOC 2 Type II', 'HIPAA / Medical', 'GDPR / Regional Standard', 'None Currently Mandated'].map(opt => (
                     <button 
                       key={opt} onClick={() => setData({...data, compliance: opt})}
-                      className={`py-4 px-4 text-left border text-[10px] font-montserrat tracking-widest uppercase transition-all ${data.compliance === opt ? 'border-white text-black bg-white' : 'border-white/10 text-neutral-500 hover:border-white/30 hover:text-white'}`}
+                      className={`py-3 sm:py-4 px-4 text-left border text-[9px] sm:text-[10px] font-montserrat tracking-widest uppercase transition-all active:scale-[0.98] ${data.compliance === opt ? 'border-white text-black bg-white' : 'border-white/10 text-neutral-500 md:hover:border-white/30 md:hover:text-white'}`}
                     >
                       {opt}
                     </button>
                   ))}
                 </div>
-                <div className="mt-4 flex justify-between items-center">
-                  <button onClick={() => setStep(1)} className="font-montserrat text-[10px] uppercase tracking-widest text-neutral-500 hover:text-white">Go Back</button>
+                <div className="mt-4 flex justify-between items-center gap-4">
+                  <button onClick={() => setStep(1)} className="font-montserrat text-[9px] sm:text-[10px] uppercase tracking-widest text-neutral-500 hover:text-white shrink-0">Go Back</button>
                   <EliteButton variant="secondary" onClick={() => setStep(3)} disabled={!isStepValid()}>Next Phase</EliteButton>
                 </div>
               </motion.div>
@@ -1288,20 +1271,20 @@ const SecurityScanner = () => {
 
             {step === 3 && !analyzing && (
               <motion.div key="step3" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="flex flex-col gap-6 w-full">
-                <h3 className="font-bebas text-2xl text-white uppercase">03 // Current Defense Protocol</h3>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <h3 className="font-bebas text-xl sm:text-2xl text-white uppercase">03 // Current Defense Protocol</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                   {['Basic Perimeter Firewall', 'Standard Antivirus Software', 'Enterprise EDR/MDR', 'Strict Zero-Trust Architecture'].map(opt => (
                     <button 
                       key={opt} onClick={() => setData({...data, defense: opt})}
-                      className={`py-4 px-4 text-left border text-[10px] font-montserrat tracking-widest uppercase transition-all ${data.defense === opt ? 'border-white text-black bg-white' : 'border-white/10 text-neutral-500 hover:border-white/30 hover:text-white'}`}
+                      className={`py-3 sm:py-4 px-4 text-left border text-[9px] sm:text-[10px] font-montserrat tracking-widest uppercase transition-all active:scale-[0.98] ${data.defense === opt ? 'border-white text-black bg-white' : 'border-white/10 text-neutral-500 md:hover:border-white/30 md:hover:text-white'}`}
                     >
                       {opt}
                     </button>
                   ))}
                 </div>
-                <div className="mt-4 flex justify-between items-center">
-                  <button onClick={() => setStep(2)} className="font-montserrat text-[10px] uppercase tracking-widest text-neutral-500 hover:text-white">Go Back</button>
-                  <EliteButton onClick={runAnalysis} disabled={!isStepValid()}>Scan Threat Surface</EliteButton>
+                <div className="mt-4 flex justify-between items-center gap-4">
+                  <button onClick={() => setStep(2)} className="font-montserrat text-[9px] sm:text-[10px] uppercase tracking-widest text-neutral-500 hover:text-white shrink-0">Go Back</button>
+                  <EliteButton onClick={runAnalysis} disabled={!isStepValid()}>Scan Surface</EliteButton>
                 </div>
               </motion.div>
             )}
@@ -1309,35 +1292,28 @@ const SecurityScanner = () => {
             {analyzing && (
               <motion.div key="analyzing" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex flex-col items-center justify-center gap-6 py-12">
                 <div className="absolute left-0 w-full h-32 pointer-events-none z-0 scanning-bar opacity-20" />
-                <ShieldAlert className="text-red-500 w-8 h-8 animate-pulse relative z-10" />
-                <h3 className="font-bebas text-3xl text-white uppercase relative z-10"><ScrambleText text="PROBING VULNERABILITY VECTORS..." trigger={analyzing} /></h3>
-                <div className="font-mono text-[9px] text-neutral-500 text-center space-y-2 relative z-10">
-                  <p>CHECKING COMPLIANCE GAPS: {data.compliance.toUpperCase()}</p>
-                  <p>EVALUATING PERIMETER STRENGTH...</p>
-                </div>
+                <ShieldAlert className="text-red-500 w-6 h-6 sm:w-8 sm:h-8 animate-pulse relative z-10" />
+                <h3 className="font-bebas text-2xl sm:text-3xl text-white uppercase relative z-10 text-center"><ScrambleText text="PROBING VECTORS..." trigger={analyzing} /></h3>
               </motion.div>
             )}
 
             {step === 4 && result && !analyzing && (
               <motion.div key="result" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="flex flex-col gap-6 w-full">
                 <div className="flex items-center gap-3">
-                  <CheckCircle2 className="text-white w-6 h-6" />
-                  <h3 className="font-bebas text-3xl text-white uppercase">SECURITY AUDIT COMPLETE</h3>
+                  <CheckCircle2 className="text-white w-5 h-5 sm:w-6 sm:h-6" />
+                  <h3 className="font-bebas text-2xl sm:text-3xl text-white uppercase">AUDIT COMPLETE</h3>
                 </div>
-                
-                <div className="p-6 border border-white/10 flex justify-between items-center" style={{ backgroundColor: result.riskScore > 60 ? 'rgba(239, 68, 68, 0.1)' : 'rgba(255,255,255,0.05)' }}>
-                  <span className="font-montserrat text-[10px] tracking-widest text-neutral-400 uppercase">THREAT VULNERABILITY SCORE</span>
-                  <span className={`font-bebas text-5xl tracking-widest ${result.riskScore > 60 ? 'text-red-500' : 'text-white'}`}>{result.riskScore}%</span>
+                <div className="p-4 sm:p-6 border border-white/10 flex flex-col sm:flex-row justify-between sm:items-center gap-2" style={{ backgroundColor: result.riskScore > 60 ? 'rgba(239, 68, 68, 0.1)' : 'rgba(255,255,255,0.05)' }}>
+                  <span className="font-montserrat text-[9px] sm:text-[10px] tracking-widest text-neutral-400 uppercase">THREAT VULNERABILITY SCORE</span>
+                  <span className={`font-bebas text-4xl sm:text-5xl tracking-widest ${result.riskScore > 60 ? 'text-red-500' : 'text-white'}`}>{result.riskScore}%</span>
                 </div>
-
-                <div className="p-6 border border-white/10 flex flex-col gap-2">
-                  <span className="font-montserrat text-[9px] tracking-widest text-neutral-500 uppercase">RECOMMENDED DEFENSE UPGRADE</span>
-                  <span className="font-bebas text-2xl text-white tracking-wider">{result.arch}</span>
+                <div className="p-4 sm:p-6 border border-white/10 flex flex-col gap-2">
+                  <span className="font-montserrat text-[8px] sm:text-[9px] tracking-widest text-neutral-500 uppercase">RECOMMENDED DEFENSE UPGRADE</span>
+                  <span className="font-bebas text-xl sm:text-2xl text-white tracking-wider">{result.arch}</span>
                 </div>
-
-                <div className="mt-4 flex justify-between items-center border-t border-white/10 pt-6">
-                  <button onClick={reset} className="font-montserrat text-[9px] tracking-widest uppercase text-neutral-500 hover:text-white">Run New Scan</button>
-                  <a href="#contact" className="font-montserrat text-[10px] font-bold text-white tracking-widest uppercase underline underline-offset-4">Secure Infrastructure Now</a>
+                <div className="mt-4 flex flex-col sm:flex-row justify-between sm:items-center border-t border-white/10 pt-6 gap-4">
+                  <button onClick={reset} className="font-montserrat text-[8px] sm:text-[9px] tracking-widest uppercase text-neutral-500 hover:text-white">Run New Scan</button>
+                  <a href="#contact" className="font-montserrat text-[9px] sm:text-[10px] font-bold text-white tracking-widest uppercase underline underline-offset-4">Secure Infrastructure Now</a>
                 </div>
               </motion.div>
             )}
@@ -1355,15 +1331,15 @@ const DiagnosticLab = () => {
   const [activeTab, setActiveTab] = useState('automation');
 
   return (
-    <div className="mb-32">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end mb-8 border-b border-white/10 pb-4 gap-4">
+    <div className="mb-24 sm:mb-32">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-6 sm:mb-8 border-b border-white/10 pb-4 gap-4">
         <div>
           <span className="font-montserrat text-[10px] tracking-[0.4em] uppercase text-neutral-500 block mb-2">INTERACTIVE TOOLS</span>
-          <h2 className="font-bebas text-5xl text-white uppercase leading-none">Diagnostic Suite</h2>
+          <h2 className="font-bebas text-4xl sm:text-5xl text-white uppercase leading-none">Diagnostic Suite</h2>
         </div>
         
         {/* Tab Controls */}
-        <div className="flex bg-white/5 border border-white/10 p-1 rounded-sm">
+        <div className="flex flex-wrap sm:flex-nowrap bg-white/5 border border-white/10 p-1 rounded-sm w-full md:w-auto">
           {[
             { id: 'automation', label: 'Automation' },
             { id: 'roi', label: 'IT ROI' },
@@ -1372,7 +1348,7 @@ const DiagnosticLab = () => {
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`px-4 py-2 font-montserrat text-[9px] font-bold tracking-widest uppercase transition-colors rounded-sm ${activeTab === tab.id ? 'bg-white text-black' : 'text-neutral-500 hover:text-white'}`}
+              className={`flex-1 sm:flex-none px-3 sm:px-4 py-2 font-montserrat text-[8px] sm:text-[9px] font-bold tracking-widest uppercase transition-colors rounded-sm ${activeTab === tab.id ? 'bg-white text-black' : 'text-neutral-500 hover:text-white'}`}
             >
               {tab.label}
             </button>
@@ -1380,7 +1356,7 @@ const DiagnosticLab = () => {
         </div>
       </div>
 
-      <div className="bg-[#050505] border border-white/10 rounded-sm p-8 md:p-12 relative overflow-hidden group">
+      <div className="bg-[#020202] border border-white/10 rounded-sm p-6 sm:p-8 md:p-12 relative overflow-hidden group">
         <AnimatePresence mode="wait">
           {activeTab === 'automation' && <motion.div key="automation" initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}}><WorkflowAnalyzer /></motion.div>}
           {activeTab === 'roi' && <motion.div key="roi" initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}}><ROICalculator /></motion.div>}
@@ -1425,13 +1401,13 @@ const SolutionsMatrix = () => {
   ];
 
   return (
-    <div className="py-24 border-t border-white/10">
-      <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6">
+    <div className="py-16 sm:py-24 border-t border-white/10">
+      <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 sm:mb-16 gap-4 sm:gap-6">
         <div>
-          <span className="font-montserrat text-[10px] tracking-[0.4em] uppercase text-neutral-500 block mb-4">PROVEN CAPABILITIES</span>
-          <h2 className="font-bebas text-5xl md:text-7xl uppercase leading-none text-white">Custom IT Implementations</h2>
+          <span className="font-montserrat text-[10px] tracking-[0.4em] uppercase text-neutral-500 block mb-3 sm:mb-4">PROVEN CAPABILITIES</span>
+          <h2 className="font-bebas text-4xl sm:text-5xl md:text-7xl uppercase leading-none text-white">Custom IT Implementations</h2>
         </div>
-        <p className="font-montserrat text-xs text-neutral-400 max-w-sm leading-relaxed">
+        <p className="font-montserrat text-[11px] sm:text-xs text-neutral-400 max-w-sm leading-relaxed">
           We don't just talk. We build. Here are over 50 specific IT and AI systems we engineer for modern enterprises.
         </p>
       </div>
@@ -1439,12 +1415,12 @@ const SolutionsMatrix = () => {
       {/* Dense Technical Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-x-8 gap-y-1 w-full border-t border-white/5 pt-8">
         {extendedSolutions.map((sol, i) => (
-          <div key={i} className="flex justify-between items-center py-3 border-b border-white/5 group hover:border-white/30 transition-colors cursor-default">
+          <div key={i} className="flex justify-between items-center py-3 border-b border-white/5 group md:hover:border-white/30 transition-colors cursor-default">
             <div className="flex items-center gap-3">
-              <span className="font-mono text-[8px] text-neutral-600 group-hover:text-white transition-colors">{(i+1).toString().padStart(2, '0')}</span>
-              <span className="font-montserrat text-[10px] md:text-[11px] text-neutral-300 uppercase tracking-widest font-bold group-hover:text-white transition-colors">{sol.name}</span>
+              <span className="font-mono text-[8px] text-neutral-600 md:group-hover:text-white transition-colors">{(i+1).toString().padStart(2, '0')}</span>
+              <span className="font-montserrat text-[9px] sm:text-[10px] md:text-[11px] text-neutral-300 uppercase tracking-widest font-bold md:group-hover:text-white transition-colors line-clamp-1">{sol.name}</span>
             </div>
-            <span className="font-mono text-[8px] tracking-widest text-neutral-600 uppercase border border-white/5 px-2 py-0.5 rounded-sm">{sol.cat}</span>
+            <span className="font-mono text-[7px] sm:text-[8px] tracking-widest text-neutral-600 uppercase border border-white/5 px-2 py-0.5 rounded-sm shrink-0 ml-4">{sol.cat}</span>
           </div>
         ))}
       </div>
@@ -1453,7 +1429,7 @@ const SolutionsMatrix = () => {
 };
 
 
-/* SOLUTIONS HUB VIEW (Includes Diagnostic Lab & Matrix) */
+/* SOLUTIONS HUB VIEW */
 const SolutionsView = () => {
   const coreModules = [
     {
@@ -1479,37 +1455,35 @@ const SolutionsView = () => {
   ];
 
   return (
-    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="pt-40 pb-24 bg-black min-h-screen">
-      <div className="w-full" style={{ paddingLeft: '3%', paddingRight: '3%' }}>
+    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="pt-32 sm:pt-40 pb-24 bg-black min-h-screen">
+      <div className="w-full" style={{ paddingLeft: 'max(1.5rem, 3%)', paddingRight: 'max(1.5rem, 3%)' }}>
         
-        <div className="border-b border-white/10 pb-12 mb-20">
+        <div className="border-b border-white/10 pb-8 sm:pb-12 mb-12 sm:mb-20">
           <span className="font-montserrat text-[10px] tracking-[0.4em] uppercase text-neutral-500 block mb-4">WHAT WE BUILD</span>
-          <h1 className="font-bebas text-6xl md:text-8xl uppercase leading-none text-white">IT & AI Solutions</h1>
-          <p className="font-montserrat text-xs text-neutral-400 max-w-xl mt-6 leading-relaxed">
+          <h1 className="font-bebas text-5xl sm:text-6xl md:text-8xl uppercase leading-none text-white">IT & AI Solutions</h1>
+          <p className="font-montserrat text-[11px] sm:text-xs text-neutral-400 max-w-xl mt-6 leading-relaxed">
             We don't use off-the-shelf templates. We engineer custom IT solutions and fine-tuned AI models that outperform standard setups by every metric. We are simply the best at building reliable software.
           </p>
         </div>
 
-        {/* 1. Diagnostic Lab Tool Wrapper */}
         <DiagnosticLab />
 
-        {/* 2. Featured Core Engines */}
         <div className="mb-12">
-          <h2 className="font-bebas text-5xl text-white uppercase mb-8">Our Primary Services</h2>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 w-full">
+          <h2 className="font-bebas text-4xl sm:text-5xl text-white uppercase mb-8">Our Primary Services</h2>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-12 w-full">
             {coreModules.map((sol, index) => (
-              <motion.div key={sol.id} initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: index * 0.1 }} viewport={{ once: true }} className="p-8 md:p-12 border border-white/10 bg-neutral-950 flex flex-col justify-between hover:border-white transition-all duration-500 w-full">
+              <motion.div key={sol.id} initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: index * 0.1 }} viewport={{ once: true }} className="p-6 sm:p-8 md:p-12 border border-white/10 bg-neutral-950 flex flex-col justify-between md:hover:border-white transition-all duration-500 w-full">
                 <div>
-                  <span className="font-mono text-xs text-neutral-600 block mb-2">0{index + 1} // SERVICE_{sol.id.toUpperCase()}</span>
-                  <h2 className="font-bebas text-4xl md:text-5xl text-white uppercase tracking-tight mb-4">{sol.name}</h2>
-                  <p className="font-montserrat text-[11px] text-neutral-400 uppercase tracking-wider mb-6 font-semibold">{sol.subtitle}</p>
-                  <p className="font-montserrat text-xs text-neutral-500 leading-relaxed mb-8">{sol.detail}</p>
+                  <span className="font-mono text-[10px] sm:text-xs text-neutral-600 block mb-2">0{index + 1} // SERVICE_{sol.id.toUpperCase()}</span>
+                  <h2 className="font-bebas text-3xl sm:text-4xl md:text-5xl text-white uppercase tracking-tight mb-4">{sol.name}</h2>
+                  <p className="font-montserrat text-[10px] sm:text-[11px] text-neutral-400 uppercase tracking-wider mb-4 sm:mb-6 font-semibold">{sol.subtitle}</p>
+                  <p className="font-montserrat text-[11px] sm:text-xs text-neutral-500 leading-relaxed mb-8">{sol.detail}</p>
                 </div>
                 <div className="border-t border-white/5 pt-6">
-                  <span className="font-montserrat text-[9px] text-neutral-500 tracking-widest uppercase block mb-3">KEY DELIVERABLES</span>
-                  <ul className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <span className="font-montserrat text-[8px] sm:text-[9px] text-neutral-500 tracking-widest uppercase block mb-3">KEY DELIVERABLES</span>
+                  <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
                     {sol.specs.map((spec, i) => (
-                      <li key={i} className="flex items-center gap-2 font-montserrat text-[10px] text-neutral-400">
+                      <li key={i} className="flex items-center gap-2 font-montserrat text-[9px] sm:text-[10px] text-neutral-400">
                         <span className="w-1 h-1 bg-white shrink-0 rounded-full" /><span>{spec}</span>
                       </li>
                     ))}
@@ -1520,7 +1494,6 @@ const SolutionsView = () => {
           </div>
         </div>
 
-        {/* 3. The 50+ Solutions Matrix */}
         <SolutionsMatrix />
 
       </div>
@@ -1538,9 +1511,12 @@ const AboutView = () => {
   ];
 
   const team = [
-    { name: "Kabir Bose", role: "Chief IT Architect", dept: "Infrastructure" },
-    { name: "Meera Nair", role: "Lead AI Engineer", dept: "Machine Learning" },
-    { name: "Devansh Soni", role: "Head of Operations", dept: "Client Success" }
+    { name: "Balasaheb Palve", role: "Chief Sales Officer", dept: "Business Dev." },
+    { name: "Anant Amar", role: "Chief Design & Dev. Officer", dept: "Design & Dev." },
+    { name: "Kushal Karera", role: "Chief Sales Runner", dept: "Business Dev." },
+    { name: "Rohan Shah", role: "Chief Sales Operator", dept: "Business Dev." },
+    { name: "Jayant Mehta", role: "Chief Sales Engineer", dept: "Business Dev." },
+    { name: "Sagar Deshpande", role: "Chief Sales Architect", dept: "Business Dev." }
   ];
 
   const milestones = [
@@ -1554,103 +1530,103 @@ const AboutView = () => {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0 }}
-      className="pt-32 pb-16 bg-black min-h-screen"
+      className="pt-32 sm:pt-40 pb-16 bg-black min-h-screen"
     >
       <div 
-        className="w-full py-16 border-b border-white/10"
-        style={{ paddingLeft: '3%', paddingRight: '3%' }}
+        className="w-full py-8 sm:py-16 border-b border-white/10"
+        style={{ paddingLeft: 'max(1.5rem, 3%)', paddingRight: 'max(1.5rem, 3%)' }}
       >
         <span className="font-montserrat text-[10px] tracking-[0.4em] uppercase text-neutral-500 block mb-6">
           COMPANY OVERVIEW
         </span>
         
-        <h1 className="font-bebas text-[12vw] md:text-[8vw] uppercase leading-none mb-8 text-white">
+        <h1 className="font-bebas text-[14vw] sm:text-[12vw] md:text-[8vw] uppercase leading-none mb-8 text-white">
           Elite Engineering.<br />
           <span className="text-outline">Unmatched Execution.</span>
         </h1>
         
-        <p className="font-montserrat text-xs md:text-sm text-neutral-400 max-w-xl leading-relaxed">
+        <p className="font-montserrat text-[11px] sm:text-xs md:text-sm text-neutral-400 max-w-xl leading-relaxed">
           Based in Pune, India, BAKR.JS is a top-tier IT and AI company. We partner with serious businesses to replace outdated tech with smart, automated systems. We are simply the best at building reliable software that scales.
         </p>
       </div>
 
       <div 
-        className="w-full py-24 grid grid-cols-2 lg:grid-cols-4 gap-8"
-        style={{ paddingLeft: '3%', paddingRight: '3%' }}
+        className="w-full py-16 sm:py-24 grid grid-cols-2 lg:grid-cols-4 gap-8"
+        style={{ paddingLeft: 'max(1.5rem, 3%)', paddingRight: 'max(1.5rem, 3%)' }}
       >
         {stats.map((stat, i) => (
           <div key={i} className="flex flex-col gap-2">
-            <span className="font-bebas text-5xl md:text-7xl text-white tracking-widest">{stat.value}</span>
-            <span className="font-montserrat text-[9px] text-neutral-500 tracking-wider uppercase">{stat.label}</span>
+            <span className="font-bebas text-4xl sm:text-5xl md:text-7xl text-white tracking-widest">{stat.value}</span>
+            <span className="font-montserrat text-[8px] sm:text-[9px] text-neutral-500 tracking-wider uppercase">{stat.label}</span>
           </div>
         ))}
       </div>
 
-      <div className="py-24 border-t border-white/10 bg-[#050505]">
-        <div className="w-full" style={{ paddingLeft: '3%', paddingRight: '3%' }}>
-          <div className="mb-16">
+      <div className="py-16 sm:py-24 border-t border-white/10 bg-[#050505]">
+        <div className="w-full" style={{ paddingLeft: 'max(1.5rem, 3%)', paddingRight: 'max(1.5rem, 3%)' }}>
+          <div className="mb-12 sm:mb-16">
             <span className="font-montserrat text-[9px] tracking-[0.3em] uppercase text-neutral-500 block mb-3">OUR HISTORY</span>
-            <h2 className="font-bebas text-5xl text-white uppercase">How We Got Here</h2>
+            <h2 className="font-bebas text-4xl sm:text-5xl text-white uppercase">How We Got Here</h2>
           </div>
           
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-12 w-full">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 sm:gap-12 w-full">
             {milestones.map((stone, i) => (
-              <div key={i} className="border-l border-white/20 pl-6 py-4 w-full">
-                <span className="font-bebas text-3xl text-white tracking-widest block mb-2">{stone.year}</span>
-                <h3 className="font-montserrat text-xs font-bold text-white uppercase mb-2">{stone.title}</h3>
-                <p className="font-montserrat text-[11px] text-neutral-500 leading-relaxed">{stone.desc}</p>
+              <div key={i} className="border-l border-white/20 pl-4 sm:pl-6 py-2 sm:py-4 w-full">
+                <span className="font-bebas text-2xl sm:text-3xl text-white tracking-widest block mb-2">{stone.year}</span>
+                <h3 className="font-montserrat text-[11px] sm:text-xs font-bold text-white uppercase mb-2">{stone.title}</h3>
+                <p className="font-montserrat text-[10px] sm:text-[11px] text-neutral-500 leading-relaxed">{stone.desc}</p>
               </div>
             ))}
           </div>
         </div>
       </div>
 
-      <div className="py-24 w-full" style={{ paddingLeft: '3%', paddingRight: '3%' }}>
-        <div className="mb-16">
+      <div className="py-16 sm:py-24 w-full" style={{ paddingLeft: 'max(1.5rem, 3%)', paddingRight: 'max(1.5rem, 3%)' }}>
+        <div className="mb-12 sm:mb-16">
           <span className="font-montserrat text-[9px] tracking-[0.3em] uppercase text-neutral-500 block mb-3">THE LEADERSHIP</span>
-          <h2 className="font-bebas text-5xl text-white uppercase">Meet The Experts</h2>
+          <h2 className="font-bebas text-4xl sm:text-5xl text-white uppercase">Meet The Experts</h2>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 w-full">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8 w-full">
           {team.map((member, i) => (
-            <div key={i} className="p-8 border border-white/10 hover:border-white transition-colors duration-500 bg-black w-full">
+            <div key={i} className="p-6 sm:p-8 border border-white/10 md:hover:border-white transition-colors duration-500 bg-black w-full">
               <span className="font-mono text-[9px] text-neutral-600 block mb-4">0{i+1} // LEADERSHIP</span>
-              <h3 className="font-bebas text-3xl text-white mb-1 uppercase tracking-wider">{member.name}</h3>
-              <p className="font-montserrat text-[10px] text-neutral-400 uppercase tracking-widest mb-4">{member.role}</p>
+              <h3 className="font-bebas text-2xl sm:text-3xl text-white mb-1 uppercase tracking-wider">{member.name}</h3>
+              <p className="font-montserrat text-[9px] sm:text-[10px] text-neutral-400 uppercase tracking-widest mb-4">{member.role}</p>
               <div className="h-[1px] bg-white/10 w-full mb-4" />
-              <span className="font-montserrat text-[9px] text-neutral-500 uppercase tracking-wider block">FOCUS: {member.dept}</span>
+              <span className="font-montserrat text-[8px] sm:text-[9px] text-neutral-500 uppercase tracking-wider block">FOCUS: {member.dept}</span>
             </div>
           ))}
         </div>
       </div>
 
-      <div className="bg-white text-black py-24 md:py-36">
+      <div className="bg-white text-black py-16 sm:py-24 md:py-36">
         <div 
-          className="w-full grid grid-cols-1 lg:grid-cols-12 gap-16 items-start"
-          style={{ paddingLeft: '3%', paddingRight: '3%' }}
+          className="w-full grid grid-cols-1 lg:grid-cols-12 gap-12 sm:gap-16 items-start"
+          style={{ paddingLeft: 'max(1.5rem, 3%)', paddingRight: 'max(1.5rem, 3%)' }}
         >
-          <div className="lg:col-span-5 sticky top-40">
+          <div className="lg:col-span-5 sticky top-24 sm:top-40">
             <span className="font-montserrat text-[10px] tracking-widest uppercase text-neutral-500 block mb-4">OUR PROMISE</span>
-            <h2 className="font-bebas text-5xl md:text-7xl uppercase leading-none text-black">
+            <h2 className="font-bebas text-4xl sm:text-5xl md:text-7xl uppercase leading-none text-black">
               Why We Are The Best
             </h2>
           </div>
-          <div className="lg:col-span-7 flex flex-col gap-12 w-full">
+          <div className="lg:col-span-7 flex flex-col gap-10 sm:gap-12 w-full">
             <div>
-              <h3 className="font-bebas text-3xl uppercase mb-3 text-black">01 / We Build It Right</h3>
-              <p className="font-montserrat text-xs text-neutral-600 leading-relaxed">
+              <h3 className="font-bebas text-2xl sm:text-3xl uppercase mb-2 sm:mb-3 text-black">01 / We Build It Right</h3>
+              <p className="font-montserrat text-[11px] sm:text-xs text-neutral-600 leading-relaxed">
                 We don't use cheap templates or messy code. We engineer IT systems from the ground up to ensure they are fast, secure, and perfectly suited to your business.
               </p>
             </div>
             <div>
-              <h3 className="font-bebas text-3xl uppercase mb-3 text-black">02 / We Focus on Results</h3>
-              <p className="font-montserrat text-xs text-neutral-600 leading-relaxed">
+              <h3 className="font-bebas text-2xl sm:text-3xl uppercase mb-2 sm:mb-3 text-black">02 / We Focus on Results</h3>
+              <p className="font-montserrat text-[11px] sm:text-xs text-neutral-600 leading-relaxed">
                 We measure our success by how much time and money we save you. We deliver rock-solid IT and AI automation that directly improves your bottom line.
               </p>
             </div>
             <div>
-              <h3 className="font-bebas text-3xl uppercase mb-3 text-black">03 / No Excuses</h3>
-              <p className="font-montserrat text-xs text-neutral-600 leading-relaxed">
+              <h3 className="font-bebas text-2xl sm:text-3xl uppercase mb-2 sm:mb-3 text-black">03 / No Excuses</h3>
+              <p className="font-montserrat text-[11px] sm:text-xs text-neutral-600 leading-relaxed">
                 When you hire us, you get a system that works 24/7. We guarantee uptime, handle the maintenance, and provide unparalleled technical support.
               </p>
             </div>
@@ -1679,31 +1655,31 @@ const TechView = () => {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0 }}
-      className="pt-40 pb-24 bg-black min-h-screen"
+      className="pt-32 sm:pt-40 pb-24 bg-black min-h-screen"
     >
-      <div className="w-full" style={{ paddingLeft: '3%', paddingRight: '3%' }}>
-        <div className="border-b border-white/10 pb-12 mb-20">
+      <div className="w-full" style={{ paddingLeft: 'max(1.5rem, 3%)', paddingRight: 'max(1.5rem, 3%)' }}>
+        <div className="border-b border-white/10 pb-8 sm:pb-12 mb-12 sm:mb-20">
           <span className="font-montserrat text-[10px] tracking-[0.4em] uppercase text-neutral-500 block mb-4">OUR ADVANTAGE</span>
-          <h1 className="font-bebas text-6xl md:text-8xl uppercase leading-none text-white">Why We Rock</h1>
-          <p className="font-montserrat text-xs text-neutral-400 max-w-xl mt-6 leading-relaxed">
+          <h1 className="font-bebas text-5xl sm:text-6xl md:text-8xl uppercase leading-none text-white">Why We Rock</h1>
+          <p className="font-montserrat text-[11px] sm:text-xs text-neutral-400 max-w-xl mt-6 leading-relaxed">
             We are the best because we care about the engineering. Most IT firms stack heavy, slow software together. We build streamlined, powerful systems that outpace the competition.
           </p>
         </div>
 
         {/* Interactive Benchmark Tool */}
-        <div className="bg-[#050505] p-8 md:p-12 border border-white/10 rounded-sm mb-24 relative overflow-hidden w-full">
+        <div className="bg-[#050505] p-6 sm:p-8 md:p-12 border border-white/10 rounded-sm mb-16 sm:mb-24 relative overflow-hidden w-full">
           <div className="absolute top-4 right-4 flex items-center gap-2">
             <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
             <span className="font-mono text-[8px] tracking-widest text-neutral-500">SPEED TEST</span>
           </div>
 
-          <h3 className="font-bebas text-3xl text-white uppercase mb-2">See the Speed Difference</h3>
-          <p className="font-montserrat text-[11px] text-neutral-500 max-w-md mb-8">
+          <h3 className="font-bebas text-2xl sm:text-3xl text-white uppercase mb-2">See the Speed Difference</h3>
+          <p className="font-montserrat text-[10px] sm:text-[11px] text-neutral-500 max-w-md mb-8">
             Move the slider to increase the workload and see how our custom IT systems stay fast while generic systems slow down.
           </p>
 
           <div className="mb-10 max-w-xl">
-            <div className="flex justify-between font-montserrat text-[10px] text-neutral-400 font-bold uppercase tracking-wider mb-2">
+            <div className="flex justify-between font-montserrat text-[9px] sm:text-[10px] text-neutral-400 font-bold uppercase tracking-wider mb-2">
               <span>WORKLOAD SIZE</span>
               <span className="text-white">{sliderVal * 10} TASKS</span>
             </div>
@@ -1717,31 +1693,31 @@ const TechView = () => {
             />
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 pt-8 border-t border-white/5 w-full">
-            <div className="p-6 bg-neutral-900/50 border border-white/5 w-full">
-              <span className="font-montserrat text-[10px] text-neutral-500 block mb-1 uppercase tracking-wider">BAKR.JS IT SYSTEM</span>
-              <span className="font-bebas text-5xl text-white tracking-widest">{bakrLatency} MS</span>
-              <span className="font-montserrat text-[9px] text-neutral-600 block mt-2">Lightning fast execution</span>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-8 pt-6 sm:pt-8 border-t border-white/5 w-full">
+            <div className="p-4 sm:p-6 bg-neutral-900/50 border border-white/5 w-full">
+              <span className="font-montserrat text-[9px] sm:text-[10px] text-neutral-500 block mb-1 uppercase tracking-wider">BAKR.JS IT SYSTEM</span>
+              <span className="font-bebas text-4xl sm:text-5xl text-white tracking-widest">{bakrLatency} MS</span>
+              <span className="font-montserrat text-[8px] sm:text-[9px] text-neutral-600 block mt-2">Lightning fast execution</span>
             </div>
-            <div className="p-6 bg-neutral-900/20 border border-white/5 opacity-50 w-full">
-              <span className="font-montserrat text-[10px] text-neutral-500 block mb-1 uppercase tracking-wider">GENERIC IT SETUP</span>
-              <span className="font-bebas text-5xl text-neutral-500 tracking-widest">{standardLatency} MS</span>
-              <span className="font-montserrat text-[9px] text-neutral-600 block mt-2">Slow, bloated processing</span>
+            <div className="p-4 sm:p-6 bg-neutral-900/20 border border-white/5 opacity-50 w-full">
+              <span className="font-montserrat text-[9px] sm:text-[10px] text-neutral-500 block mb-1 uppercase tracking-wider">GENERIC IT SETUP</span>
+              <span className="font-bebas text-4xl sm:text-5xl text-neutral-500 tracking-widest">{standardLatency} MS</span>
+              <span className="font-montserrat text-[8px] sm:text-[9px] text-neutral-600 block mt-2">Slow, bloated processing</span>
             </div>
           </div>
         </div>
 
         {/* Pillars of Engineering */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-12 w-full">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 sm:gap-12 w-full">
           {pillars.map((pillar, i) => {
             const Icon = pillar.icon;
             return (
-              <div key={i} className="flex flex-col items-start gap-4 p-8 border border-white/5 bg-neutral-950 w-full">
+              <div key={i} className="flex flex-col items-start gap-4 p-6 sm:p-8 border border-white/5 bg-neutral-950 w-full">
                 <div className="p-3 bg-white/5 text-white border border-white/10 mb-2">
                   <Icon size={20} />
                 </div>
-                <h3 className="font-bebas text-2xl text-white uppercase tracking-wider">{pillar.title}</h3>
-                <p className="font-montserrat text-xs text-neutral-500 leading-relaxed">{pillar.desc}</p>
+                <h3 className="font-bebas text-xl sm:text-2xl text-white uppercase tracking-wider">{pillar.title}</h3>
+                <p className="font-montserrat text-[11px] sm:text-xs text-neutral-500 leading-relaxed">{pillar.desc}</p>
               </div>
             );
           })}
@@ -1797,21 +1773,21 @@ const BlogsView = () => {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0 }}
-      className="pt-40 pb-24 bg-black min-h-screen"
+      className="pt-32 sm:pt-40 pb-24 bg-black min-h-screen"
     >
-      <div className="w-full" style={{ paddingLeft: '3%', paddingRight: '3%' }}>
-        <div className="border-b border-white/10 pb-12 mb-12">
+      <div className="w-full" style={{ paddingLeft: 'max(1.5rem, 3%)', paddingRight: 'max(1.5rem, 3%)' }}>
+        <div className="border-b border-white/10 pb-8 sm:pb-12 mb-8 sm:mb-12">
           <span className="font-montserrat text-[10px] tracking-[0.4em] uppercase text-neutral-500 block mb-4">OUR EXPERTISE</span>
-          <h1 className="font-bebas text-6xl md:text-8xl uppercase leading-none text-white">Insights & News</h1>
+          <h1 className="font-bebas text-5xl sm:text-6xl md:text-8xl uppercase leading-none text-white">Insights & News</h1>
         </div>
 
         {/* Filters */}
-        <div className="flex flex-wrap gap-4 mb-16 font-montserrat text-[9px] tracking-widest uppercase font-bold text-neutral-500 w-full">
+        <div className="flex flex-wrap gap-2 sm:gap-4 mb-12 sm:mb-16 font-montserrat text-[8px] sm:text-[9px] tracking-widest uppercase font-bold text-neutral-500 w-full">
           {categories.map((cat) => (
             <button 
               key={cat}
               onClick={() => setActiveFilter(cat)}
-              className={`px-4 py-2 border transition-all ${activeFilter === cat ? 'border-white text-white bg-white/5' : 'border-white/10 hover:border-white/30 text-neutral-500'}`}
+              className={`px-3 sm:px-4 py-2 border transition-all ${activeFilter === cat ? 'border-white text-white bg-white/5' : 'border-white/10 md:hover:border-white/30 text-neutral-500'}`}
             >
               {cat}
             </button>
@@ -1827,20 +1803,20 @@ const BlogsView = () => {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: i * 0.05 }}
-              className="group py-12 border-b border-white/10 hover:border-white transition-colors duration-500 flex flex-col md:flex-row justify-between gap-8 cursor-pointer w-full"
+              className="group py-8 sm:py-12 border-b border-white/10 md:hover:border-white transition-colors duration-500 flex flex-col md:flex-row justify-between gap-6 sm:gap-8 cursor-pointer w-full"
             >
               <div className="md:w-3/4">
-                <div className="flex items-center gap-4 mb-4 font-montserrat text-[10px] text-neutral-500">
+                <div className="flex items-center gap-3 sm:gap-4 mb-3 sm:mb-4 font-montserrat text-[9px] sm:text-[10px] text-neutral-500">
                   <span>{art.date}</span>
                   <span className="w-1 h-1 bg-white/20 rounded-full" />
                   <span className="text-white uppercase tracking-wider">{art.category}</span>
                 </div>
-                <h3 className="font-bebas text-3xl md:text-5xl text-white group-hover:text-neutral-300 transition-colors mb-4">{art.title}</h3>
-                <p className="font-montserrat text-xs text-neutral-500 leading-relaxed max-w-2xl">{art.desc}</p>
+                <h3 className="font-bebas text-2xl sm:text-3xl md:text-5xl text-white md:group-hover:text-neutral-300 transition-colors mb-3 sm:mb-4">{art.title}</h3>
+                <p className="font-montserrat text-[11px] sm:text-xs text-neutral-500 leading-relaxed max-w-2xl">{art.desc}</p>
               </div>
-              <div className="md:w-1/4 flex items-end md:justify-end">
-                <span className="p-3 border border-white/10 group-hover:border-white rounded-full transition-colors duration-300 text-white">
-                  <ArrowUpRight size={18} className="group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+              <div className="md:w-1/4 flex items-start md:items-end justify-end">
+                <span className="p-2 sm:p-3 border border-white/10 md:group-hover:border-white rounded-full transition-colors duration-300 text-white">
+                  <ArrowUpRight size={16} className="md:group-hover:translate-x-0.5 md:group-hover:-translate-y-0.5 transition-transform" />
                 </span>
               </div>
             </motion.div>
@@ -1873,20 +1849,20 @@ const ContactView = () => {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0 }}
-      className="pt-40 pb-24 bg-black min-h-screen"
+      className="pt-32 sm:pt-40 pb-24 bg-black min-h-screen"
     >
       <div 
-        className="w-full grid grid-cols-1 lg:grid-cols-12 gap-16"
-        style={{ paddingLeft: '3%', paddingRight: '3%' }}
+        className="w-full grid grid-cols-1 lg:grid-cols-12 gap-12 sm:gap-16"
+        style={{ paddingLeft: 'max(1.5rem, 3%)', paddingRight: 'max(1.5rem, 3%)' }}
       >
         <div className="lg:col-span-5">
           <span className="font-montserrat text-[10px] tracking-[0.4em] uppercase text-neutral-500 block mb-4">START A PROJECT</span>
-          <h1 className="font-bebas text-6xl md:text-8xl uppercase leading-none text-white mb-6">Let's Build</h1>
-          <p className="font-montserrat text-xs text-neutral-400 leading-relaxed mb-8">
+          <h1 className="font-bebas text-5xl sm:text-6xl md:text-8xl uppercase leading-none text-white mb-6">Let's Build</h1>
+          <p className="font-montserrat text-[11px] sm:text-xs text-neutral-400 leading-relaxed mb-8">
             Tell us about your IT goals. Our engineering team will review your needs and reach out to discuss how we can upgrade your systems.
           </p>
 
-          <div className="flex flex-col gap-4 font-montserrat text-[11px] text-neutral-500 uppercase tracking-widest pt-6 border-t border-white/10 w-full">
+          <div className="flex flex-col gap-4 font-montserrat text-[10px] sm:text-[11px] text-neutral-500 uppercase tracking-widest pt-6 border-t border-white/10 w-full">
             <div>
               <span className="text-white">EMAIL US</span>
               <p className="font-normal mt-1">hello@bakr.js</p>
@@ -1898,29 +1874,29 @@ const ContactView = () => {
           </div>
         </div>
 
-        <div className="lg:col-span-7 bg-[#050505] border border-white/10 p-8 md:p-12 rounded-sm w-full">
+        <div className="lg:col-span-7 bg-[#050505] border border-white/10 p-6 sm:p-8 md:p-12 rounded-sm w-full">
           {!transmissionComplete ? (
-            <form onSubmit={handleTransmit} className="flex flex-col gap-8 w-full">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 w-full">
+            <form onSubmit={handleTransmit} className="flex flex-col gap-6 sm:gap-8 w-full">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-8 w-full">
                 <div className="flex flex-col gap-2">
-                  <label className="font-montserrat text-[9px] text-neutral-500 tracking-wider font-bold uppercase">YOUR NAME</label>
+                  <label className="font-montserrat text-[8px] sm:text-[9px] text-neutral-500 tracking-wider font-bold uppercase">YOUR NAME</label>
                   <input 
                     type="text" 
                     value={formState.name}
                     onChange={(e) => setFormState(prev => ({ ...prev, name: e.target.value }))}
-                    className="footer-input py-3 text-xs uppercase" 
+                    className="footer-input py-2 sm:py-3 text-[10px] sm:text-xs uppercase w-full bg-transparent" 
                     placeholder="John Doe"
                     required
                     disabled={transmitting}
                   />
                 </div>
                 <div className="flex flex-col gap-2">
-                  <label className="font-montserrat text-[9px] text-neutral-500 tracking-wider font-bold uppercase">YOUR EMAIL</label>
+                  <label className="font-montserrat text-[8px] sm:text-[9px] text-neutral-500 tracking-wider font-bold uppercase">YOUR EMAIL</label>
                   <input 
                     type="email" 
                     value={formState.email}
                     onChange={(e) => setFormState(prev => ({ ...prev, email: e.target.value }))}
-                    className="footer-input py-3 text-xs" 
+                    className="footer-input py-2 sm:py-3 text-[10px] sm:text-xs w-full bg-transparent" 
                     placeholder="john@company.com"
                     required
                     disabled={transmitting}
@@ -1928,13 +1904,13 @@ const ContactView = () => {
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 w-full">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-8 w-full">
                 <div className="flex flex-col gap-2">
-                  <label className="font-montserrat text-[9px] text-neutral-500 tracking-wider font-bold uppercase">PROJECT TYPE</label>
+                  <label className="font-montserrat text-[8px] sm:text-[9px] text-neutral-500 tracking-wider font-bold uppercase">PROJECT TYPE</label>
                   <select 
                     value={formState.sector}
                     onChange={(e) => setFormState(prev => ({ ...prev, sector: e.target.value }))}
-                    className="bg-black border border-white/10 text-white py-3 px-4 text-xs tracking-widest uppercase focus:outline-none focus:border-white rounded-none"
+                    className="bg-black border border-white/10 text-white py-2 sm:py-3 px-3 sm:px-4 text-[10px] sm:text-xs tracking-widest uppercase focus:outline-none focus:border-white rounded-none w-full appearance-none"
                     disabled={transmitting}
                   >
                     <option>IT Modernization</option>
@@ -1944,11 +1920,11 @@ const ContactView = () => {
                   </select>
                 </div>
                 <div className="flex flex-col gap-2">
-                  <label className="font-montserrat text-[9px] text-neutral-500 tracking-wider font-bold uppercase">TIMEFRAME</label>
+                  <label className="font-montserrat text-[8px] sm:text-[9px] text-neutral-500 tracking-wider font-bold uppercase">TIMEFRAME</label>
                   <select 
                     value={formState.timeframe}
                     onChange={(e) => setFormState(prev => ({ ...prev, timeframe: e.target.value }))}
-                    className="bg-black border border-white/10 text-white py-3 px-4 text-xs tracking-widest uppercase focus:outline-none focus:border-white rounded-none"
+                    className="bg-black border border-white/10 text-white py-2 sm:py-3 px-3 sm:px-4 text-[10px] sm:text-xs tracking-widest uppercase focus:outline-none focus:border-white rounded-none w-full appearance-none"
                     disabled={transmitting}
                   >
                     <option>Immediately</option>
@@ -1961,7 +1937,7 @@ const ContactView = () => {
 
               <button 
                 type="submit" 
-                className="w-full bg-white text-black py-4 font-montserrat font-bold text-xs tracking-widest uppercase hover:bg-neutral-200 transition-colors flex items-center justify-center gap-3"
+                className="w-full bg-white text-black py-4 font-montserrat font-bold text-[10px] sm:text-xs tracking-widest uppercase hover:bg-neutral-200 transition-colors flex items-center justify-center gap-3 active:scale-[0.98]"
                 disabled={transmitting}
               >
                 {transmitting ? <Terminal className="animate-spin w-4 h-4" /> : null}
@@ -1972,18 +1948,18 @@ const ContactView = () => {
             <motion.div 
               initial={{ scale: 0.95, opacity: 0 }} 
               animate={{ scale: 1, opacity: 1 }}
-              className="text-center py-16 flex flex-col items-center justify-center w-full"
+              className="text-center py-12 sm:py-16 flex flex-col items-center justify-center w-full"
             >
               <div className="p-4 bg-white/5 border border-white/10 rounded-full text-white mb-6">
-                <CheckCircle2 size={40} />
+                <CheckCircle2 size={32} className="sm:w-10 sm:h-10" />
               </div>
-              <h3 className="font-bebas text-4xl text-white mb-2">INQUIRY RECEIVED</h3>
-              <p className="font-montserrat text-[11px] text-neutral-500 max-w-sm mb-8 leading-relaxed">
+              <h3 className="font-bebas text-3xl sm:text-4xl text-white mb-2">INQUIRY RECEIVED</h3>
+              <p className="font-montserrat text-[10px] sm:text-[11px] text-neutral-500 max-w-sm mb-8 leading-relaxed">
                 Thank you. We have received your project details. One of our senior IT architects will be in touch with you shortly.
               </p>
               <button 
                 onClick={() => { setTransmissionComplete(false); }} 
-                className="font-montserrat text-[9px] font-bold text-white tracking-widest uppercase underline"
+                className="font-montserrat text-[8px] sm:text-[9px] font-bold text-white tracking-widest uppercase underline"
               >
                 Send Another Message
               </button>
@@ -2002,40 +1978,40 @@ const PrivacyView = () => (
     initial={{ opacity: 0 }}
     animate={{ opacity: 1 }}
     exit={{ opacity: 0 }}
-    className="pt-40 pb-24 bg-black min-h-screen w-full"
-    style={{ paddingLeft: '3%', paddingRight: '3%' }}
+    className="pt-32 sm:pt-40 pb-24 bg-black min-h-screen w-full"
+    style={{ paddingLeft: 'max(1.5rem, 3%)', paddingRight: 'max(1.5rem, 3%)' }}
   >
-    <div className="border-b border-white/10 pb-12 mb-16 w-full">
+    <div className="border-b border-white/10 pb-8 sm:pb-12 mb-12 sm:mb-16 w-full">
       <span className="font-montserrat text-[10px] tracking-[0.4em] uppercase text-neutral-500 block mb-4">PRIVACY COMPLIANCE</span>
-      <h1 className="font-bebas text-6xl md:text-8xl uppercase leading-none text-white">Privacy Strategy</h1>
-      <p className="font-mono text-[9px] text-neutral-500 mt-4">LAST MODIFIED: 18 MAY 2026 // COMPLIANT WITH ISO-27701</p>
+      <h1 className="font-bebas text-5xl sm:text-6xl md:text-8xl uppercase leading-none text-white">Privacy Strategy</h1>
+      <p className="font-mono text-[8px] sm:text-[9px] text-neutral-500 mt-4">LAST MODIFIED: 18 MAY 2026 // COMPLIANT WITH ISO-27701</p>
     </div>
 
-    <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 items-start w-full">
-      <div className="lg:col-span-4 sticky top-40">
-        <h2 className="font-bebas text-3xl uppercase mb-4 text-neutral-400">Core Objectives</h2>
-        <p className="font-montserrat text-xs text-neutral-500 leading-relaxed">
+    <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 sm:gap-16 items-start w-full">
+      <div className="lg:col-span-4 sticky top-24 sm:top-40">
+        <h2 className="font-bebas text-2xl sm:text-3xl uppercase mb-4 text-neutral-400">Core Objectives</h2>
+        <p className="font-montserrat text-[11px] sm:text-xs text-neutral-500 leading-relaxed">
           This document explains our zero-knowledge custody mechanisms, telemetry capture policies, and how we minimize database retention footprints.
         </p>
       </div>
 
-      <div className="lg:col-span-8 flex flex-col gap-12 font-montserrat text-xs text-neutral-400 leading-relaxed w-full">
+      <div className="lg:col-span-8 flex flex-col gap-10 sm:gap-12 font-montserrat text-[11px] sm:text-xs text-neutral-400 leading-relaxed w-full">
         <div>
-          <h3 className="font-bebas text-2xl text-white mb-3">1.0 Data Custody Architecture</h3>
+          <h3 className="font-bebas text-xl sm:text-2xl text-white mb-3">1.0 Data Custody Architecture</h3>
           <p className="mb-4">
             Our systems run under a strict zero-knowledge paradigm. This means we do not store, intercept, or interpret private enterprise operational data that flows through active cognitive routing pipelines. All localized weight matrices remain on client infrastructure.
           </p>
         </div>
 
         <div>
-          <h3 className="font-bebas text-2xl text-white mb-3">2.0 Edge Telemetry Storage</h3>
+          <h3 className="font-bebas text-xl sm:text-2xl text-white mb-3">2.0 Edge Telemetry Storage</h3>
           <p className="mb-4">
             Edge performance statistics (processing duration, ping delay, output length) are collected strictly in aggregate. No identifiable personal datasets, human-readable prompts, or strategic corporate documents are ever transferred to centralized cloud logs.
           </p>
         </div>
 
         <div>
-          <h3 className="font-bebas text-2xl text-white mb-3">3.0 Third-Party Handshakes</h3>
+          <h3 className="font-bebas text-xl sm:text-2xl text-white mb-3">3.0 Third-Party Handshakes</h3>
           <p className="mb-4">
             BAKR.JS does not participate in data broking, model marketing, or external metadata telemetry monetization. Compliance boundaries prohibit sharing cluster usage metrics with third-party analytical firms.
           </p>
@@ -2051,40 +2027,40 @@ const TermsView = () => (
     initial={{ opacity: 0 }}
     animate={{ opacity: 1 }}
     exit={{ opacity: 0 }}
-    className="pt-40 pb-24 bg-black min-h-screen w-full"
-    style={{ paddingLeft: '3%', paddingRight: '3%' }}
+    className="pt-32 sm:pt-40 pb-24 bg-black min-h-screen w-full"
+    style={{ paddingLeft: 'max(1.5rem, 3%)', paddingRight: 'max(1.5rem, 3%)' }}
   >
-    <div className="border-b border-white/10 pb-12 mb-16 w-full">
+    <div className="border-b border-white/10 pb-8 sm:pb-12 mb-12 sm:mb-16 w-full">
       <span className="font-montserrat text-[10px] tracking-[0.4em] uppercase text-neutral-500 block mb-4">LICENSING FRAMEWORK</span>
-      <h1 className="font-bebas text-6xl md:text-8xl uppercase leading-none text-white">Terms of Custody</h1>
-      <p className="font-mono text-[9px] text-neutral-500 mt-4">REVISED OPERATING STATUS: v2.6 // ENTERPRISE BOUNDS APPLIED</p>
+      <h1 className="font-bebas text-5xl sm:text-6xl md:text-8xl uppercase leading-none text-white">Terms of Custody</h1>
+      <p className="font-mono text-[8px] sm:text-[9px] text-neutral-500 mt-4">REVISED OPERATING STATUS: v2.6 // ENTERPRISE BOUNDS APPLIED</p>
     </div>
 
-    <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 items-start w-full">
-      <div className="lg:col-span-4 sticky top-40">
-        <h2 className="font-bebas text-3xl uppercase mb-4 text-neutral-400">Usage Boundaries</h2>
-        <p className="font-montserrat text-xs text-neutral-500 leading-relaxed">
+    <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 sm:gap-16 items-start w-full">
+      <div className="lg:col-span-4 sticky top-24 sm:top-40">
+        <h2 className="font-bebas text-2xl sm:text-3xl uppercase mb-4 text-neutral-400">Usage Boundaries</h2>
+        <p className="font-montserrat text-[11px] sm:text-xs text-neutral-500 leading-relaxed">
           By utilizing cognitive clusters developed by BAKR.JS, you agree to these resource constraints, computing metrics, and intellectual covenants.
         </p>
       </div>
 
-      <div className="lg:col-span-8 flex flex-col gap-12 font-montserrat text-xs text-neutral-400 leading-relaxed w-full">
+      <div className="lg:col-span-8 flex flex-col gap-10 sm:gap-12 font-montserrat text-[11px] sm:text-xs text-neutral-400 leading-relaxed w-full">
         <div>
-          <h3 className="font-bebas text-2xl text-white mb-3">1.0 Licensed Resource Allocations</h3>
+          <h3 className="font-bebas text-xl sm:text-2xl text-white mb-3">1.0 Licensed Resource Allocations</h3>
           <p className="mb-4">
             Compute licenses are granted on a node-locked basis. You may not deploy localized weight matrices onto environments exceeding your registered cluster parameters. If throughput surpasses safe CPU/GPU thermal ceilings, the client assumes operational custody of hardware.
           </p>
         </div>
 
         <div>
-          <h3 className="font-bebas text-2xl text-white mb-3">2.0 Neural Reverse Engineering</h3>
+          <h3 className="font-bebas text-xl sm:text-2xl text-white mb-3">2.0 Neural Reverse Engineering</h3>
           <p className="mb-4">
             Unless authorized by custom enterprise agreement, compiling, deconstructing, or applying predictive attacks to original BAKR.JS clustering algorithms is strictly prohibited. Violators face immediate runtime licensing revocation.
           </p>
         </div>
 
         <div>
-          <h3 className="font-bebas text-2xl text-white mb-3">3.0 Liability Thresholds</h3>
+          <h3 className="font-bebas text-xl sm:text-2xl text-white mb-3">3.0 Liability Thresholds</h3>
           <p className="mb-4">
             BAKR.JS engineers high-performance IT structures. In no event shall our institute be held liable for synthetic output anomalies, network connectivity interruptions, or hardware overhead under unauthorized self-managed cluster deployment conditions.
           </p>
@@ -2108,45 +2084,45 @@ const SLAView = () => {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0 }}
-      className="pt-40 pb-24 bg-black min-h-screen"
+      className="pt-32 sm:pt-40 pb-24 bg-black min-h-screen"
     >
-      <div className="w-full" style={{ paddingLeft: '3%', paddingRight: '3%' }}>
+      <div className="w-full" style={{ paddingLeft: 'max(1.5rem, 3%)', paddingRight: 'max(1.5rem, 3%)' }}>
         
         {/* Editorial Heading */}
-        <div className="border-b border-white/10 pb-12 mb-16 w-full">
+        <div className="border-b border-white/10 pb-8 sm:pb-12 mb-12 sm:mb-16 w-full">
           <span className="font-montserrat text-[10px] tracking-[0.4em] uppercase text-neutral-500 block mb-4">SECURITY PORTAL</span>
-          <h1 className="font-bebas text-6xl md:text-8xl uppercase leading-none text-white">SLA & Security Hub</h1>
-          <p className="font-montserrat text-xs text-neutral-400 max-w-lg mt-6 leading-relaxed">
+          <h1 className="font-bebas text-5xl sm:text-6xl md:text-8xl uppercase leading-none text-white">SLA & Security Hub</h1>
+          <p className="font-montserrat text-[11px] sm:text-xs text-neutral-400 max-w-lg mt-4 sm:mt-6 leading-relaxed">
             Our systems are built for mission-critical operations. We maintain absolute transparency regarding uptime commitments, cognitive latency limits, and active security compliance policies.
           </p>
         </div>
 
         {/* SLA Metrics grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-24 w-full">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8 mb-16 sm:mb-24 w-full">
           {metrics.map((metric, i) => (
-            <div key={i} className="p-8 border border-white/10 bg-neutral-950 flex flex-col justify-between hover:border-white/30 transition-colors w-full">
+            <div key={i} className="p-6 sm:p-8 border border-white/10 bg-neutral-950 flex flex-col justify-between hover:border-white/30 transition-colors w-full">
               <div>
-                <span className="font-bebas text-4xl text-white block mb-1">{metric.stat}</span>
-                <span className="font-montserrat text-[10px] font-bold text-neutral-400 uppercase tracking-wider block mb-4">{metric.title}</span>
+                <span className="font-bebas text-3xl sm:text-4xl text-white block mb-1">{metric.stat}</span>
+                <span className="font-montserrat text-[9px] sm:text-[10px] font-bold text-neutral-400 uppercase tracking-wider block mb-3 sm:mb-4">{metric.title}</span>
               </div>
-              <p className="font-montserrat text-[11px] text-neutral-500 leading-relaxed">{metric.detail}</p>
+              <p className="font-montserrat text-[10px] sm:text-[11px] text-neutral-500 leading-relaxed">{metric.detail}</p>
             </div>
           ))}
         </div>
 
         {/* Compliance Details */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 items-start w-full">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 sm:gap-16 items-start w-full">
           <div className="lg:col-span-4">
-            <h2 className="font-bebas text-4xl uppercase mb-4 text-white">Enterprise Safety Covenants</h2>
-            <p className="font-montserrat text-xs text-neutral-500 leading-relaxed">
+            <h2 className="font-bebas text-3xl sm:text-4xl uppercase mb-4 text-white">Enterprise Safety Covenants</h2>
+            <p className="font-montserrat text-[11px] sm:text-xs text-neutral-500 leading-relaxed">
               We operate under heavy structural frameworks to support critical financial, administrative, and operations clusters.
             </p>
           </div>
-          <div className="lg:col-span-8 flex flex-col gap-12 font-montserrat text-xs text-neutral-400 leading-relaxed w-full">
+          <div className="lg:col-span-8 flex flex-col gap-10 sm:gap-12 font-montserrat text-[11px] sm:text-xs text-neutral-400 leading-relaxed w-full">
             <div className="flex items-start gap-4">
               <ShieldCheck className="text-white shrink-0 w-5 h-5 mt-1" />
               <div>
-                <h3 className="font-bebas text-2xl text-white mb-2">SOC 2 Type II Audited</h3>
+                <h3 className="font-bebas text-xl sm:text-2xl text-white mb-2">SOC 2 Type II Audited</h3>
                 <p>
                   Every system, log node, and architecture element created by BAKR.JS complies strictly with trust principles of security, processing integrity, and continuous availability.
                 </p>
@@ -2155,7 +2131,7 @@ const SLAView = () => {
             <div className="flex items-start gap-4">
               <Cpu className="text-white shrink-0 w-5 h-5 mt-1" />
               <div>
-                <h3 className="font-bebas text-2xl text-white mb-2">Air-Gapped Network Readiness</h3>
+                <h3 className="font-bebas text-xl sm:text-2xl text-white mb-2">Air-Gapped Network Readiness</h3>
                 <p>
                   To secure sensitive parameters, our clusters can operate in fully air-gapped environments, completely isolated from public internet access.
                 </p>
@@ -2164,7 +2140,7 @@ const SLAView = () => {
             <div className="flex items-start gap-4">
               <Database className="text-white shrink-0 w-5 h-5 mt-1" />
               <div>
-                <h3 className="font-bebas text-2xl text-white mb-2">De-centralized Failover Protocol</h3>
+                <h3 className="font-bebas text-xl sm:text-2xl text-white mb-2">De-centralized Failover Protocol</h3>
                 <p>
                   Should any hardware pod disconnect, workload calculations are split dynamically and rerouted to active nodes within milliseconds, maintaining peak platform performance.
                 </p>
@@ -2181,19 +2157,19 @@ const SLAView = () => {
 /* Pre-Footer */
 const PreFooter = ({ onNavigate }) => {
   return (
-    <section className="py-24 border-t border-white/10 bg-[#050505] relative overflow-hidden">
+    <section className="py-16 sm:py-24 border-t border-white/10 bg-[#050505] relative overflow-hidden">
       <div 
-        className="w-full grid grid-cols-1 lg:grid-cols-12 gap-16 items-center relative z-10"
-        style={{ paddingLeft: '3%', paddingRight: '3%' }}
+        className="w-full grid grid-cols-1 lg:grid-cols-12 gap-12 sm:gap-16 items-center relative z-10"
+        style={{ paddingLeft: 'max(1.5rem, 3%)', paddingRight: 'max(1.5rem, 3%)' }}
       >
         <div className="lg:col-span-5">
-          <span className="font-montserrat text-[10px] tracking-[0.3em] uppercase text-neutral-500 block mb-4">
+          <span className="font-montserrat text-[9px] sm:text-[10px] tracking-[0.3em] uppercase text-neutral-500 block mb-4">
             READY TO UPGRADE?
           </span>
-          <h2 className="font-bebas text-5xl md:text-7xl uppercase leading-none mb-6 text-white">
+          <h2 className="font-bebas text-4xl sm:text-5xl md:text-7xl uppercase leading-none mb-4 sm:mb-6 text-white">
             Modernize your tech.
           </h2>
-          <p className="font-montserrat text-xs text-neutral-400 leading-relaxed mb-8 max-w-sm">
+          <p className="font-montserrat text-[11px] sm:text-xs text-neutral-400 leading-relaxed mb-6 sm:mb-8 max-w-sm">
             Stop guessing. Answer a few questions about your business and see exactly how much time and money AI and modern IT can save you.
           </p>
           <EliteButton onClick={() => onNavigate('solutions')} variant="secondary">
@@ -2225,68 +2201,68 @@ const Footer = ({ onNavigate }) => {
   };
 
   return (
-    <footer className="bg-[#020202] border-t border-white/10 pt-20 pb-12">
-      <div className="w-full" style={{ paddingLeft: '3%', paddingRight: '3%' }}>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-12 mb-16">
+    <footer className="bg-[#020202] border-t border-white/10 pt-16 sm:pt-20 pb-10 sm:pb-12">
+      <div className="w-full" style={{ paddingLeft: 'max(1.5rem, 3%)', paddingRight: 'max(1.5rem, 3%)' }}>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-10 sm:gap-12 mb-12 sm:mb-16 w-full">
           
           {/* Logo, pitch & telemetry info */}
-          <div className="lg:col-span-4 flex flex-col items-start">
-            <div className="h-[26px] md:h-[31px] mb-6 cursor-pointer" onClick={() => onNavigate('home')}>
+          <div className="lg:col-span-4 flex flex-col items-start w-full">
+            <div className="h-[22px] sm:h-[26px] md:h-[31px] mb-6 cursor-pointer" onClick={() => onNavigate('home')}>
               <img 
                 src={logoUrl} 
                 alt="BAKR.JS Logo" 
                 className="h-full w-auto logo-filter object-contain"
               />
             </div>
-            <p className="font-montserrat text-[11px] text-neutral-500 leading-relaxed uppercase tracking-wider max-w-sm mb-8">
+            <p className="font-montserrat text-[10px] sm:text-[11px] text-neutral-500 leading-relaxed uppercase tracking-wider max-w-xs sm:max-w-sm mb-6 sm:mb-8">
               Building world-class IT and AI systems for enterprise scale. We deliver the tech that runs modern business.
             </p>
-            <div className="flex flex-col gap-1 font-mono text-[9px] text-neutral-600">
+            <div className="flex flex-col gap-1 font-mono text-[8px] sm:text-[9px] text-neutral-600">
               <span>LOC: PUNE, INDIA</span>
               <span>COORDINATES: 18.5204° N, 73.8567° E</span>
             </div>
           </div>
 
           {/* Sitemaps */}
-          <div className="lg:col-span-2 flex flex-col gap-4">
-            <span className="font-montserrat text-[10px] font-bold tracking-[0.2em] text-neutral-400 uppercase">
+          <div className="lg:col-span-2 flex flex-col gap-4 w-full">
+            <span className="font-montserrat text-[9px] sm:text-[10px] font-bold tracking-[0.2em] text-neutral-400 uppercase">
               Company
             </span>
-            <ul className="flex flex-col gap-2.5 font-montserrat text-[11px] text-neutral-500">
-              <li><button onClick={() => onNavigate('solutions')} className="hover:text-white transition-colors text-left">Our Solutions</button></li>
-              <li><button onClick={() => onNavigate('about')} className="hover:text-white transition-colors text-left">About Us</button></li>
-              <li><button onClick={() => onNavigate('tech')} className="hover:text-white transition-colors text-left">Why We Are Best</button></li>
-              <li><button onClick={() => onNavigate('blogs')} className="hover:text-white transition-colors text-left">Insights</button></li>
+            <ul className="flex flex-col gap-2 sm:gap-2.5 font-montserrat text-[10px] sm:text-[11px] text-neutral-500">
+              <li><button onClick={() => onNavigate('solutions')} className="hover:text-white transition-colors text-left w-full sm:w-auto">Our Solutions</button></li>
+              <li><button onClick={() => onNavigate('about')} className="hover:text-white transition-colors text-left w-full sm:w-auto">About Us</button></li>
+              <li><button onClick={() => onNavigate('tech')} className="hover:text-white transition-colors text-left w-full sm:w-auto">Why We Are Best</button></li>
+              <li><button onClick={() => onNavigate('blogs')} className="hover:text-white transition-colors text-left w-full sm:w-auto">Insights</button></li>
             </ul>
           </div>
 
-          <div className="lg:col-span-2 flex flex-col gap-4">
-            <span className="font-montserrat text-[10px] font-bold tracking-[0.2em] text-neutral-400 uppercase">
+          <div className="lg:col-span-2 flex flex-col gap-4 w-full">
+            <span className="font-montserrat text-[9px] sm:text-[10px] font-bold tracking-[0.2em] text-neutral-400 uppercase">
               Compliance
             </span>
-            <ul className="flex flex-col gap-2.5 font-montserrat text-[11px] text-neutral-500">
-              <li><button onClick={() => onNavigate('privacy')} className="hover:text-white transition-colors text-left">Privacy Policy</button></li>
-              <li><button onClick={() => onNavigate('terms')} className="hover:text-white transition-colors text-left">Terms of Service</button></li>
-              <li><button onClick={() => onNavigate('sla')} className="hover:text-white transition-colors text-left">Security Hub</button></li>
+            <ul className="flex flex-col gap-2 sm:gap-2.5 font-montserrat text-[10px] sm:text-[11px] text-neutral-500">
+              <li><button onClick={() => onNavigate('privacy')} className="hover:text-white transition-colors text-left w-full sm:w-auto">Privacy Policy</button></li>
+              <li><button onClick={() => onNavigate('terms')} className="hover:text-white transition-colors text-left w-full sm:w-auto">Terms of Service</button></li>
+              <li><button onClick={() => onNavigate('sla')} className="hover:text-white transition-colors text-left w-full sm:w-auto">Security Hub</button></li>
             </ul>
           </div>
 
           {/* Interactive Newsletter / Dispatch Signup */}
-          <div className="lg:col-span-4 flex flex-col gap-4">
-            <span className="font-montserrat text-[10px] font-bold tracking-[0.2em] text-neutral-400 uppercase">
+          <div className="lg:col-span-4 flex flex-col gap-4 w-full">
+            <span className="font-montserrat text-[9px] sm:text-[10px] font-bold tracking-[0.2em] text-neutral-400 uppercase">
               Join Our Newsletter
             </span>
-            <p className="font-montserrat text-[11px] text-neutral-500 leading-normal">
+            <p className="font-montserrat text-[10px] sm:text-[11px] text-neutral-500 leading-normal">
               Get the latest IT trends and AI automation strategies sent directly to your inbox. No spam.
             </p>
-            <form onSubmit={handleSubscribe} className="flex flex-col gap-2 mt-2">
-              <div className="relative">
+            <form onSubmit={handleSubscribe} className="flex flex-col gap-2 mt-2 w-full">
+              <div className="relative w-full">
                 <input 
                   type="email" 
                   placeholder="ENTER WORK EMAIL" 
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full footer-input py-3 text-[10px] tracking-widest uppercase pl-1 pr-10"
+                  className="w-full footer-input py-3 text-[9px] sm:text-[10px] tracking-widest uppercase pl-1 pr-10"
                   required
                 />
                 <button type="submit" className="absolute right-0 top-1/2 -translate-y-1/2 text-white hover:text-neutral-400 p-2">
@@ -2299,7 +2275,7 @@ const Footer = ({ onNavigate }) => {
                     initial={{ opacity: 0, y: 5 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0 }}
-                    className="font-mono text-[9px] text-green-500 tracking-wider"
+                    className="font-mono text-[8px] sm:text-[9px] text-green-500 tracking-wider"
                   >
                     THANK YOU FOR SUBSCRIBING.
                   </motion.span>
@@ -2311,15 +2287,15 @@ const Footer = ({ onNavigate }) => {
         </div>
 
         {/* Bottom Bar with coordinates, compliance info, copyright & back-to-top */}
-        <div className="pt-8 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-6">
+        <div className="pt-6 sm:pt-8 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-6 w-full">
           <div className="flex flex-col items-center md:items-start gap-1">
-            <span className="font-montserrat text-[9px] tracking-[0.3em] text-neutral-600 uppercase">
+            <span className="font-montserrat text-[8px] sm:text-[9px] tracking-[0.3em] text-neutral-600 uppercase text-center md:text-left">
               © 2026 BAKR.JS — ELITE IT ENGINEERING
             </span>
           </div>
 
-          <div className="flex gap-8 items-center">
-            <div className="flex gap-6 font-montserrat text-[10px] font-bold tracking-[0.1em] uppercase text-neutral-500">
+          <div className="flex gap-6 sm:gap-8 items-center w-full sm:w-auto justify-between sm:justify-end">
+            <div className="flex gap-4 sm:gap-6 font-montserrat text-[9px] sm:text-[10px] font-bold tracking-[0.1em] uppercase text-neutral-500">
               <a href="#" className="hover:text-white transition-colors">TWITTER</a>
               <a href="#" className="hover:text-white transition-colors">LINKEDIN</a>
               <a href="#" className="hover:text-white transition-colors">GITHUB</a>
@@ -2327,7 +2303,7 @@ const Footer = ({ onNavigate }) => {
             
             <button 
               onClick={scrollToTop}
-              className="p-3 border border-white/10 hover:border-white text-neutral-400 hover:text-white rounded-full transition-colors group shrink-0"
+              className="p-2 sm:p-3 border border-white/10 hover:border-white text-neutral-400 hover:text-white rounded-full transition-colors group shrink-0"
               title="Return to top"
             >
               <ArrowUp size={14} className="group-hover:-translate-y-0.5 transition-transform" />
