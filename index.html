@@ -1,30 +1,64 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>BAKR.JS</title>
     
-    <!-- Premium Brand Title -->
+    <!-- Primary Meta Tags -->
     <title>BAKR.JS | Elite Enterprise IT & AI Infrastructure</title>
-    
-    <!-- SEO & Meta Tags -->
     <meta name="description" content="BAKR.JS is an elite IT and AI infrastructure institute based in Pune. We engineer custom, high-performance cognitive systems and bare-metal architectures for ambitious global enterprises.">
     <meta name="keywords" content="IT Infrastructure, AI Engineering, Custom AI Solutions, Enterprise Systems, Bare Metal Hosting, Pune Tech, Generative AI">
     <meta name="author" content="BAKR.JS">
-    
-    <!-- Favicon -->
+    <meta name="robots" content="index, follow" />
+
+    <!-- GEO Meta Tags -->
+    <meta name="geo.region" content="IN-MH" />
+    <meta name="geo.placename" content="Pune" />
+    <meta name="geo.region" content="RW" />
+
+    <!-- Favicon & App Icons -->
     <link rel="icon" type="image/png" href="https://media.licdn.com/dms/image/v2/D4D0BAQGRDTitTKMN9Q/company-logo_200_200/B4DZ5fTBQAHoAE-/0/1779715283611?e=1781136000&v=beta&t=7hYgMh58neC28SFDXP6NcOtM2G2cxYIUS8822Vhf8Dc">
-    
-    <!-- Tailwind CSS (if needed at the root level, though React usually compiles it) -->
-    <script src="https://cdn.tailwindcss.com"></script>
-</head>
-<body class="bg-black text-white selection:bg-white selection:text-black">
+    <link rel="apple-touch-icon" href="https://media.licdn.com/dms/image/v2/D4D0BAQGRDTitTKMN9Q/company-logo_200_200/B4DZ5fTBQAHoAE-/0/1779715283611?e=1781136000&v=beta&t=7hYgMh58neC28SFDXP6NcOtM2G2cxYIUS8822Vhf8Dc" />
+    <meta name="theme-color" content="#043b25" />
 
-    <!-- React Mounting Point -->
+    <!-- AIO / Schema.org structured data (Helps AI and Search Engines understand the entity) -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "name": "IAG Global",
+      "alternateName": "Invade Agro Global",
+      "url": "https://www.invadeagro.com/",
+      "logo": "https://static.wixstatic.com/media/548938_a34a84020ba14e6c8df35c63dddc2b35~mv2.png",
+      "description": "IAG operates an integrated agricultural platform across Africa and India—combining regulated distribution, agronomy programs, and field execution.",
+      "foundingDate": "1851",
+      "founders": [
+        {
+          "@type": "Person",
+          "name": "Sheth Giga Ram Chotalia"
+        }
+      ],
+      "contactPoint": {
+        "@type": "ContactPoint",
+        "telephone": "+91-99207-79198",
+        "contactType": "customer service",
+        "areaServed": ["IN", "RW"],
+        "availableLanguage": ["en"]
+      },
+      "address": [
+        {
+          "@type": "PostalAddress",
+          "addressLocality": "Mumbai",
+          "addressRegion": "Maharashtra",
+          "addressCountry": "IN"
+        },
+        {
+          "@type": "PostalAddress",
+          "addressLocality": "Kigali",
+          "addressCountry": "RW"
+        }
+      ]
+    }
+    </script>
+  </head>
+  <body>
     <div id="root"></div>
-
-    <!-- Application Entry Point -->
-    <script type="module" src="/src/App.jsx"></script>
-
-</body>
-</html>
