@@ -1,84 +1,85 @@
 <!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BAKR.JS | Elite Enterprise IT & AI Infrastructure</title>
     
-    <!-- Primary Meta Tags -->
-    <title>IAG India | Integrated Agricultural Ecosystem & Agri Inputs</title>
-    <meta name="title" content="IAG Global | Integrated Agricultural Ecosystem & Agri Inputs" />
-    <meta name="description" content="IAG operates across India and Africa's agricultural ecosystem, connecting agri inputs, distribution networks, field operations, and predictive intelligence for scalable agriculture." />
-    <meta name="keywords" content="IAG Global, Invade Agro, Invade Mill, Invade Code, agricultural ecosystem, agri inputs, crop protection, seed science, nutrient management, agritech India, agritech Africa, agronomy" />
-    <meta name="author" content="IAG Global" />
-    <meta name="robots" content="index, follow" />
+    <!-- Meta Data for SEO -->
+    <meta name="description" content="BAKR.JS is an elite IT and AI infrastructure institute based in Pune. We engineer custom, high-performance systems for ambitious global enterprises.">
+    <meta name="keywords" content="IT Infrastructure, AI Engineering, Custom AI Solutions, Enterprise Systems, Pune Tech">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="https://media.licdn.com/dms/image/v2/D4D0BAQGRDTitTKMN9Q/company-logo_200_200/B4DZ5fTBQAHoAE-/0/1779715283611?e=1781136000&v=beta&t=7hYgMh58neC28SFDXP6NcOtM2G2cxYIUS8822Vhf8Dc">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Montserrat:wght@300;400;500;600&display=swap');
+        
+        body { font-family: 'Montserrat', sans-serif; }
+        .font-bebas { font-family: 'Bebas Neue', sans-serif; }
+    </style>
+</head>
+<body class="bg-black text-white selection:bg-white selection:text-black">
 
-    <!-- GEO Meta Tags -->
-    <meta name="geo.region" content="IN-MH" />
-    <meta name="geo.placename" content="Mumbai" />
-    <meta name="geo.region" content="RW" />
-    <meta name="geo.placename" content="Kigali" />
+    <!-- Navigation -->
+    <nav class="fixed w-full z-50 p-6 flex justify-between items-center bg-black/80 backdrop-blur-md border-b border-white/10">
+        <a href="#" class="text-2xl font-bold tracking-tighter">BAKR.JS</a>
+        <div class="hidden md:flex gap-8 text-[10px] font-bold uppercase tracking-widest text-neutral-400">
+            <a href="#solutions" class="hover:text-white transition-colors">Solutions</a>
+            <a href="#about" class="hover:text-white transition-colors">About</a>
+            <a href="#contact" class="hover:text-white transition-colors">Contact</a>
+        </div>
+    </nav>
 
-    <!-- Open Graph / Facebook (Enhances link sharing on social media) -->
-    <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://www.invadeagro.in/" />
-    <meta property="og:title" content="IAG India | Integrated Agricultural Ecosystem" />
-    <meta property="og:description" content="Connecting agri inputs, distribution networks, field operations, and predictive intelligence for scalable agriculture." />
-    <meta property="og:image" content="https://static.wixstatic.com/media/548938_a34a84020ba14e6c8df35c63dddc2b35~mv2.png" />
+    <!-- Hero Section -->
+    <section class="h-screen flex flex-col justify-center px-6 md:px-12 pt-20">
+        <h1 class="font-bebas text-7xl md:text-[10vw] uppercase leading-[0.85] mb-8">
+            Machines of clarity.<br>
+            <span class="text-neutral-600">Humans of craft.</span>
+        </h1>
+        <p class="text-lg md:text-xl text-neutral-400 max-w-xl font-light leading-relaxed mb-12">
+            Engineering scalable AI and IT infrastructure for ambitious enterprises. We remove the noise to amplify your signal.
+        </p>
+        <div class="flex gap-4">
+            <a href="#contact" class="px-8 py-4 bg-white text-black font-bold uppercase tracking-widest text-xs hover:bg-neutral-200 transition-colors">
+                Initiate Project
+            </a>
+        </div>
+    </section>
 
-    <!-- Twitter -->
-    <meta property="twitter:card" content="summary_large_image" />
-    <meta property="twitter:url" content="https://www.invadeagro.com/" />
-    <meta property="twitter:title" content="IAG Global | Integrated Agricultural Ecosystem" />
-    <meta property="twitter:description" content="Connecting agri inputs, distribution networks, field operations, and predictive intelligence for scalable agriculture." />
-    <meta property="twitter:image" content="https://static.wixstatic.com/media/548938_a34a84020ba14e6c8df35c63dddc2b35~mv2.png" />
+    <!-- Services Section -->
+    <section id="solutions" class="py-32 px-6 md:px-12 bg-white text-black">
+        <h2 class="font-bebas text-5xl uppercase mb-16">Core Solutions</h2>
+        <div class="grid md:grid-cols-2 gap-12">
+            <div class="border-b border-black/10 pb-8">
+                <h3 class="font-bebas text-3xl mb-4">Enterprise IT Setup</h3>
+                <p class="text-neutral-600">Bulletproof cloud infrastructure and automated maintenance for 99.99% uptime.</p>
+            </div>
+            <div class="border-b border-black/10 pb-8">
+                <h3 class="font-bebas text-3xl mb-4">Custom AI Integration</h3>
+                <p class="text-neutral-600">Tailored AI models designed to automate complex workflows and slash operational costs.</p>
+            </div>
+        </div>
+    </section>
 
-    <!-- Favicon & App Icons -->
-    <link rel="icon" type="image/png" href="https://static.wixstatic.com/media/548938_39cd1515bcb241759c46afbbc9ca7ce8~mv2.png" />
-    <link rel="apple-touch-icon" href="https://static.wixstatic.com/media/548938_39cd1515bcb241759c46afbbc9ca7ce8~mv2.png" />
-    <meta name="theme-color" content="#043b25" />
+    <!-- Footer -->
+    <footer class="py-20 px-6 md:px-12 border-t border-white/10">
+        <div class="grid md:grid-cols-3 gap-12">
+            <div>
+                <p class="text-[10px] uppercase tracking-widest text-neutral-500">© 2026 BAKR.JS</p>
+            </div>
+            <div class="flex flex-col gap-4">
+                <a href="#solutions" class="text-sm hover:underline">Solutions</a>
+                <a href="#about" class="text-sm hover:underline">About</a>
+                <a href="#contact" class="text-sm hover:underline">Contact</a>
+            </div>
+            <div class="font-mono text-[9px] text-neutral-600">
+                <p>PUNE, INDIA</p>
+                <p>GLOBAL ENTERPRISE INFRASTRUCTURE</p>
+            </div>
+        </div>
+    </footer>
 
-    <!-- AIO / Schema.org structured data (Helps AI and Search Engines understand the entity) -->
-    <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "Organization",
-      "name": "IAG Global",
-      "alternateName": "Invade Agro Global",
-      "url": "https://www.invadeagro.com/",
-      "logo": "https://static.wixstatic.com/media/548938_a34a84020ba14e6c8df35c63dddc2b35~mv2.png",
-      "description": "IAG operates an integrated agricultural platform across Africa and India—combining regulated distribution, agronomy programs, and field execution.",
-      "foundingDate": "1851",
-      "founders": [
-        {
-          "@type": "Person",
-          "name": "Sheth Giga Ram Chotalia"
-        }
-      ],
-      "contactPoint": {
-        "@type": "ContactPoint",
-        "telephone": "+91-99207-79198",
-        "contactType": "customer service",
-        "areaServed": ["IN", "RW"],
-        "availableLanguage": ["en"]
-      },
-      "address": [
-        {
-          "@type": "PostalAddress",
-          "addressLocality": "Mumbai",
-          "addressRegion": "Maharashtra",
-          "addressCountry": "IN"
-        },
-        {
-          "@type": "PostalAddress",
-          "addressLocality": "Kigali",
-          "addressCountry": "RW"
-        }
-      ]
-    }
-    </script>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.jsx"></script>
-  </body>
+</body>
 </html>
